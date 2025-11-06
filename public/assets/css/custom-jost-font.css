@@ -1,0 +1,252 @@
+/* Police Jost personnalisée pour MOYOO fleet */
+
+/* Application de la police Jost à tous les éléments */
+* {
+    font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+}
+
+/* Éléments spécifiques avec poids de police optimisés */
+body {
+    font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    font-weight: 400;
+    line-height: 1.6;
+}
+
+/* Titres */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+}
+
+h1 {
+    font-weight: 700;
+    font-size: 2.5rem;
+}
+
+h2 {
+    font-weight: 600;
+    font-size: 2rem;
+}
+
+h3 {
+    font-weight: 600;
+    font-size: 1.75rem;
+}
+
+h4 {
+    font-weight: 600;
+    font-size: 1.5rem;
+}
+
+h5 {
+    font-weight: 500;
+    font-size: 1.25rem;
+}
+
+h6 {
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+/* Navigation et menus */
+.navbar, .nav, .menu, .sidebar {
+    font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    font-weight: 500;
+}
+
+/* Boutons */
+.btn {
+    font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    font-weight: 500;
+    letter-spacing: 0.025em;
+}
+
+.btn-primary {
+    font-weight: 600;
+}
+
+.btn-lg {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+/* Formulaires */
+.form-control, .form-select, .form-label {
+    font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+}
+
+.form-label {
+    font-weight: 500;
+}
+
+.form-control {
+    font-weight: 400;
+}
+
+/* Cartes et composants */
+.card {
+    font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+}
+
+.card-title {
+    font-weight: 600;
+}
+
+.card-text {
+    font-weight: 400;
+}
+
+/* Tableaux */
+.table {
+    font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+}
+
+.table th {
+    font-weight: 600;
+}
+
+.table td {
+    font-weight: 400;
+}
+
+/* Alertes */
+.alert {
+    font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    font-weight: 500;
+}
+
+/* Badges */
+.badge {
+    font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    font-weight: 500;
+}
+
+/* Modales */
+.modal {
+    font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+}
+
+.modal-title {
+    font-weight: 600;
+}
+
+/* Dropdowns */
+.dropdown-menu {
+    font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    font-weight: 400;
+}
+
+.dropdown-item {
+    font-weight: 400;
+}
+
+/* Breadcrumbs */
+.breadcrumb {
+    font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    font-weight: 400;
+}
+
+/* Pagination */
+.pagination {
+    font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    font-weight: 500;
+}
+
+/* Progress bars */
+.progress {
+    font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+}
+
+/* Tooltips */
+.tooltip {
+    font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    font-weight: 400;
+}
+
+/* Popovers */
+.popover {
+    font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    font-weight: 400;
+}
+
+/* Spécifique aux pages d'authentification */
+.authentication-wrapper {
+    font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+}
+
+.authentication-wrapper h4 {
+    font-weight: 600;
+    letter-spacing: -0.025em;
+}
+
+.authentication-wrapper p {
+    font-weight: 400;
+}
+
+/* Spécifique au dashboard */
+.dashboard-wrapper {
+    font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+}
+
+/* Statistiques et métriques */
+.stats-card {
+    font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+}
+
+.stats-number {
+    font-weight: 700;
+    letter-spacing: -0.05em;
+}
+
+.stats-label {
+    font-weight: 500;
+}
+
+/* Amélioration de la lisibilité */
+.text-muted {
+    font-weight: 400;
+}
+
+.text-primary {
+    font-weight: 500;
+}
+
+.text-success {
+    font-weight: 500;
+}
+
+.text-warning {
+    font-weight: 500;
+}
+
+.text-danger {
+    font-weight: 500;
+}
+
+/* Responsive typography */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2rem;
+    }
+
+    h2 {
+        font-size: 1.75rem;
+    }
+
+    h3 {
+        font-size: 1.5rem;
+    }
+
+    .btn-lg {
+        font-size: 1rem;
+    }
+}
+
+/* Optimisation pour les écrans haute résolution */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
