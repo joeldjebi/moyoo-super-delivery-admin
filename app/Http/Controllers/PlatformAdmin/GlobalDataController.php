@@ -10,6 +10,7 @@ use App\Models\HistoriqueLivraison;
 use App\Models\Ramassage;
 use App\Models\Livreur;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class GlobalDataController extends Controller
@@ -19,6 +20,10 @@ class GlobalDataController extends Controller
      */
     public function livraisons(Request $request)
     {
+        $admin = Auth::guard('platform_admin')->user();
+        if (!$admin || !$admin->hasPermission('global_data.livraisons')) {
+            abort(403, 'Vous n\'avez pas la permission de consulter les livraisons globales.');
+        }
         $data['title'] = 'Toutes les livraisons';
         $data['menu'] = 'global-data-livraisons';
 
@@ -77,6 +82,10 @@ class GlobalDataController extends Controller
      */
     public function colis(Request $request)
     {
+        $admin = Auth::guard('platform_admin')->user();
+        if (!$admin || !$admin->hasPermission('global_data.colis')) {
+            abort(403, 'Vous n\'avez pas la permission de consulter les colis globaux.');
+        }
         $data['title'] = 'Tous les colis';
         $data['menu'] = 'global-data-colis';
 
@@ -130,6 +139,10 @@ class GlobalDataController extends Controller
      */
     public function ramassages(Request $request)
     {
+        $admin = Auth::guard('platform_admin')->user();
+        if (!$admin || !$admin->hasPermission('global_data.ramassages')) {
+            abort(403, 'Vous n\'avez pas la permission de consulter les ramassages globaux.');
+        }
         $data['title'] = 'Tous les ramassages';
         $data['menu'] = 'global-data-ramassages';
 
@@ -185,6 +198,10 @@ class GlobalDataController extends Controller
      */
     public function livreurs(Request $request)
     {
+        $admin = Auth::guard('platform_admin')->user();
+        if (!$admin || !$admin->hasPermission('global_data.livreurs')) {
+            abort(403, 'Vous n\'avez pas la permission de consulter les livreurs globaux.');
+        }
         $data['title'] = 'Tous les livreurs';
         $data['menu'] = 'global-data-livreurs';
 
@@ -236,6 +253,10 @@ class GlobalDataController extends Controller
      */
     public function boutiques(Request $request)
     {
+        $admin = Auth::guard('platform_admin')->user();
+        if (!$admin || !$admin->hasPermission('global_data.boutiques')) {
+            abort(403, 'Vous n\'avez pas la permission de consulter les boutiques globales.');
+        }
         $data['title'] = 'Toutes les boutiques';
         $data['menu'] = 'global-data-boutiques';
 

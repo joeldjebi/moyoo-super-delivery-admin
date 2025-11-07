@@ -4,6 +4,7 @@ namespace App\Http\Controllers\PlatformAdmin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -13,6 +14,10 @@ class LogController extends Controller
 {
     public function index(Request $request)
     {
+        $admin = Auth::guard('platform_admin')->user();
+        if (!$admin || !$admin->hasPermission('logs.read')) {
+            abort(403, 'Vous n\'avez pas la permission de consulter les logs.');
+        }
         $data['title'] = 'Logs système';
         $data['menu'] = 'logs';
         $logFile = storage_path('logs/laravel.log');
@@ -87,6 +92,10 @@ class LogController extends Controller
 
     public function show(string $id)
     {
+        $admin = Auth::guard('platform_admin')->user();
+        if (!$admin || !$admin->hasPermission('logs.read')) {
+            abort(403, 'Vous n\'avez pas la permission de consulter les logs.');
+        }
         $logFile = storage_path('logs/laravel.log');
 
         if (!File::exists($logFile)) {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\PlatformAdmin;
 use App\Http\Controllers\Controller;
 use App\Models\PricingPlan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -12,6 +13,10 @@ class PricingPlanController extends Controller
 {
     public function index(Request $request)
     {
+        $admin = Auth::guard('platform_admin')->user();
+        if (!$admin || !$admin->hasPermission('pricing_plans.read')) {
+            abort(403, 'Vous n\'avez pas la permission de consulter les plans tarifaires.');
+        }
         $data['title'] = 'Plans tarifaires';
         $data['menu'] = 'pricing-plans';
         $query = PricingPlan::query();
@@ -44,6 +49,10 @@ class PricingPlanController extends Controller
 
     public function create()
     {
+        $admin = Auth::guard('platform_admin')->user();
+        if (!$admin || !$admin->hasPermission('pricing_plans.create')) {
+            abort(403, 'Vous n\'avez pas la permission de créer des plans tarifaires.');
+        }
         $data['title'] = 'Créer un plan tarifaire';
         $data['menu'] = 'pricing-plans';
         return view('platform-admin.pricing-plans.create', $data);
@@ -51,6 +60,10 @@ class PricingPlanController extends Controller
 
     public function store(Request $request)
     {
+        $admin = Auth::guard('platform_admin')->user();
+        if (!$admin || !$admin->hasPermission('pricing_plans.create')) {
+            abort(403, 'Vous n\'avez pas la permission de créer des plans tarifaires.');
+        }
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -90,6 +103,10 @@ class PricingPlanController extends Controller
 
     public function show(string $id)
     {
+        $admin = Auth::guard('platform_admin')->user();
+        if (!$admin || !$admin->hasPermission('pricing_plans.read')) {
+            abort(403, 'Vous n\'avez pas la permission de consulter les plans tarifaires.');
+        }
         $plan = DB::table('pricing_plans')->where('id', $id)->first();
 
         if (!$plan) {
@@ -101,6 +118,10 @@ class PricingPlanController extends Controller
 
     public function edit(string $id)
     {
+        $admin = Auth::guard('platform_admin')->user();
+        if (!$admin || !$admin->hasPermission('pricing_plans.update')) {
+            abort(403, 'Vous n\'avez pas la permission de modifier les plans tarifaires.');
+        }
         $plan = DB::table('pricing_plans')->where('id', $id)->first();
 
         if (!$plan) {
@@ -112,6 +133,10 @@ class PricingPlanController extends Controller
 
     public function update(Request $request, string $id)
     {
+        $admin = Auth::guard('platform_admin')->user();
+        if (!$admin || !$admin->hasPermission('pricing_plans.update')) {
+            abort(403, 'Vous n\'avez pas la permission de modifier les plans tarifaires.');
+        }
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -151,6 +176,10 @@ class PricingPlanController extends Controller
 
     public function destroy(string $id)
     {
+        $admin = Auth::guard('platform_admin')->user();
+        if (!$admin || !$admin->hasPermission('pricing_plans.delete')) {
+            abort(403, 'Vous n\'avez pas la permission de supprimer les plans tarifaires.');
+        }
         DB::table('pricing_plans')->where('id', $id)->delete();
 
         Log::info('Plan tarifaire supprimé par super admin', [

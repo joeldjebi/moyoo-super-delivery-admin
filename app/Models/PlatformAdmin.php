@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Hash;
 
 class PlatformAdmin extends Authenticatable
@@ -29,6 +32,7 @@ class PlatformAdmin extends Authenticatable
         'two_factor_secret',
         'last_login_at',
         'last_login_ip',
+        'created_by',
     ];
 
     /**
@@ -160,4 +164,139 @@ class PlatformAdmin extends Authenticatable
     {
         return trim($this->first_name . ' ' . $this->last_name) ?: $this->username;
     }
+
+    /**
+     * Relation avec l'admin créateur
+     */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(PlatformAdmin::class, 'created_by');
+    }
+
+    /**
+     * Relation avec les admins créés par cet admin
+     */
+    public function createdAdmins(): HasMany
+    {
+        return $this->hasMany(PlatformAdmin::class, 'created_by');
+    }
+
+    /**
+     * Relation avec les rôles (many-to-many)
+     */
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'platform_admin_roles', 'platform_admin_id', 'role_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * Relation avec les permissions directes (many-to-many)
+     */
+    public function permissions(): BelongsToMany
+    {
+        return $this->belongsToMany(Permission::class, 'platform_admin_permissions', 'platform_admin_id', 'permission_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * Relation avec les logs d'activité
+     */
+    public function activityLogs(): HasMany
+    {
+        return $this->hasMany(AdminActivityLog::class, 'platform_admin_id');
+    }
+
+    /**
+     * Vérifier si l'admin a un rôle spécifique
+     */
+    public function hasRole(string|array $role): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        $roles = is_array($role) ? $role : [$role];
+
+        return $this->roles()->whereIn('slug', $roles)->exists();
+    }
+
+    /**
+     * Vérifier si l'admin a au moins un des rôles spécifiés
+     */
+    public function hasAnyRole(array $roles): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return $this->roles()->whereIn('slug', $roles)->exists();
+    }
+
+    /**
+     * Vérifier si l'admin est super admin
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->roles()->where('slug', 'super-admin')->exists();
+    }
+
+    /**
+     * Obtenir toutes les permissions de l'admin (via rôles + permissions directes)
+     */
+    public function getAllPermissions()
+    {
+        if ($this->isSuperAdmin()) {
+            // Super admin a toutes les permissions
+            return Permission::all();
+        }
+
+        // Permissions via rôles
+        $rolePermissions = Permission::whereHas('roles', function ($query) {
+            $query->whereHas('admins', function ($q) {
+                $q->where('platform_admins.id', $this->id);
+            });
+        })->get();
+
+        // Permissions directes
+        $directPermissions = $this->permissions;
+
+        // Fusionner et dédupliquer
+        return $rolePermissions->merge($directPermissions)->unique('id');
+    }
+
+    /**
+     * Vérifier si l'admin a une permission spécifique
+     */
+    public function hasPermission(string $permission): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        // Format: resource.action ou resource.action
+        $parts = explode('.', $permission);
+        if (count($parts) !== 2) {
+            return false;
+        }
+
+        [$resource, $action] = $parts;
+
+        // Vérifier les permissions directes
+        $hasDirectPermission = $this->permissions()
+            ->where('resource', $resource)
+            ->where('action', $action)
+            ->exists();
+
+        if ($hasDirectPermission) {
+            return true;
+        }
+
+        // Vérifier les permissions via les rôles
+        return $this->roles()->whereHas('permissions', function ($query) use ($resource, $action) {
+            $query->where('resource', $resource)
+                  ->where('action', $action);
+        })->exists();
+    }
+
 }

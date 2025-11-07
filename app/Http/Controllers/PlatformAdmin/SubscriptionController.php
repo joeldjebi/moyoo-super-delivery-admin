@@ -8,6 +8,7 @@ use App\Models\Entreprise;
 use App\Models\PricingPlan;
 use App\Models\SubscriptionUpgradeHistory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -17,6 +18,10 @@ class SubscriptionController extends Controller
 {
     public function index(Request $request)
     {
+        $admin = Auth::guard('platform_admin')->user();
+        if (!$admin || !$admin->hasPermission('subscriptions.read')) {
+            abort(403, 'Vous n\'avez pas la permission de consulter les abonnements.');
+        }
         $data['title'] = 'Abonnements';
         $data['menu'] = 'subscriptions';
         $query = SubscriptionPlan::with(['entreprise', 'pricingPlan']);
@@ -102,6 +107,10 @@ class SubscriptionController extends Controller
 
     public function show(string $id)
     {
+        $admin = Auth::guard('platform_admin')->user();
+        if (!$admin || !$admin->hasPermission('subscriptions.read')) {
+            abort(403, 'Vous n\'avez pas la permission de consulter les abonnements.');
+        }
         $subscription = SubscriptionPlan::with(['entreprise', 'pricingPlan'])
             ->findOrFail($id);
 
@@ -113,6 +122,10 @@ class SubscriptionController extends Controller
      */
     public function showUpgradeForm(string $entreprise_id)
     {
+        $admin = Auth::guard('platform_admin')->user();
+        if (!$admin || !$admin->hasPermission('subscriptions.upgrade_form')) {
+            abort(403, 'Vous n\'avez pas la permission d\'accéder au formulaire d\'upgrade.');
+        }
         $data['title'] = 'Upgrade d\'abonnement';
         $data['menu'] = 'subscriptions';
         $data['entreprise'] = Entreprise::whereNull('deleted_at')->findOrFail($entreprise_id);
@@ -137,6 +150,10 @@ class SubscriptionController extends Controller
      */
     public function upgrade(Request $request, string $entreprise_id)
     {
+        $admin = Auth::guard('platform_admin')->user();
+        if (!$admin || !$admin->hasPermission('subscriptions.upgrade')) {
+            abort(403, 'Vous n\'avez pas la permission d\'upgrader un abonnement.');
+        }
         $validated = $request->validate([
             'nouveau_pricing_plan_id' => 'required|exists:pricing_plans,id',
             'raison' => 'nullable|string|max:500',
@@ -235,6 +252,10 @@ class SubscriptionController extends Controller
      */
     public function upgradeHistory(Request $request)
     {
+        $admin = Auth::guard('platform_admin')->user();
+        if (!$admin || !$admin->hasPermission('subscriptions.upgrade_history')) {
+            abort(403, 'Vous n\'avez pas la permission de consulter l\'historique des upgrades.');
+        }
         $data['title'] = 'Historique des upgrades d\'abonnement';
         $data['menu'] = 'subscriptions-upgrade-history';
 

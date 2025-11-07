@@ -4,6 +4,7 @@ namespace App\Http\Controllers\PlatformAdmin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -11,6 +12,10 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
+        $admin = Auth::guard('platform_admin')->user();
+        if (!$admin || !$admin->hasPermission('users.read')) {
+            abort(403, 'Vous n\'avez pas la permission de consulter les utilisateurs.');
+        }
         $data['title'] = 'Utilisateurs';
         $data['menu'] = 'users';
         $query = DB::table('users')
@@ -70,6 +75,10 @@ class UserController extends Controller
 
     public function show(string $id)
     {
+        $admin = Auth::guard('platform_admin')->user();
+        if (!$admin || !$admin->hasPermission('users.read')) {
+            abort(403, 'Vous n\'avez pas la permission de consulter les utilisateurs.');
+        }
         $data['title'] = 'Voir un utilisateur';
         $data['menu'] = 'users';
         $data['user'] = DB::table('users')
@@ -129,6 +138,10 @@ class UserController extends Controller
 
     public function destroy(string $id)
     {
+        $admin = Auth::guard('platform_admin')->user();
+        if (!$admin || !$admin->hasPermission('users.delete')) {
+            abort(403, 'Vous n\'avez pas la permission de supprimer les utilisateurs.');
+        }
         // Soft delete
         DB::table('users')
             ->where('id', $id)

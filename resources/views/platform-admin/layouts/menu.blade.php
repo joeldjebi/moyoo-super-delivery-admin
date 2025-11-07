@@ -70,6 +70,34 @@
                 </li>
 
                 <li class="menu-header small">
+                  <span class="menu-header-text">Administration</span>
+                </li>
+
+                <!-- Administrateurs -->
+                <li class="menu-item {{ isset($menu) && ($menu == 'admin-users' || str_contains(request()->route()->getName(), 'admin-users')) ? 'active' : '' }}">
+                  <a href="{{ route('platform-admin.admin-users.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ti ti-user-shield"></i>
+                    <div data-i18n="Administrateurs">Administrateurs</div>
+                  </a>
+                </li>
+
+                <!-- Rôles -->
+                <li class="menu-item {{ isset($menu) && ($menu == 'roles' || str_contains(request()->route()->getName(), 'roles')) ? 'active' : '' }}">
+                  <a href="{{ route('platform-admin.roles.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ti ti-user-circle"></i>
+                    <div data-i18n="Rôles">Rôles</div>
+                  </a>
+                </li>
+
+                <!-- Permissions -->
+                <li class="menu-item {{ isset($menu) && ($menu == 'permissions' || str_contains(request()->route()->getName(), 'permissions')) ? 'active' : '' }}">
+                  <a href="{{ route('platform-admin.permissions.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ti ti-shield-check"></i>
+                    <div data-i18n="Permissions">Permissions</div>
+                  </a>
+                </li>
+
+                <li class="menu-header small">
                   <span class="menu-header-text">Abonnements</span>
                 </li>
 

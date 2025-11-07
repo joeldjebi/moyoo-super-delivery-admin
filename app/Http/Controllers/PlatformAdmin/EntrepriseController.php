@@ -11,16 +11,29 @@ use App\Models\HistoriqueLivraison;
 use App\Models\PackageColis;
 use App\Models\Ramassage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class EntrepriseController extends Controller
 {
     /**
+     * Vérifier la permission pour accéder aux entreprises
+     */
+    private function checkPermission(string $permission = 'entreprises.read'): void
+    {
+        $admin = Auth::guard('platform_admin')->user();
+        if (!$admin || !$admin->hasPermission($permission)) {
+            abort(403, 'Vous n\'avez pas la permission d\'accéder à cette ressource.');
+        }
+    }
+
+    /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
+        $this->checkPermission('entreprises.read');
         $data['title'] = 'Entreprises';
         $data['menu'] = 'entreprises';
 
@@ -103,6 +116,7 @@ class EntrepriseController extends Controller
      */
     public function show(string $id)
     {
+        $this->checkPermission('entreprises.read');
         $data['title'] = 'Voir une entreprise';
         $data['menu'] = 'entreprises';
 
@@ -139,6 +153,7 @@ class EntrepriseController extends Controller
      */
     public function toggleStatus(string $id)
     {
+        $this->checkPermission('entreprises.toggle_status');
         $data['title'] = 'Activer ou désactiver une entreprise';
         $data['menu'] = 'entreprises';
         $entreprise = Entreprise::find($id);
@@ -166,6 +181,7 @@ class EntrepriseController extends Controller
      */
     public function marchands(string $id, Request $request)
     {
+        $this->checkPermission('entreprises.read');
         $data['title'] = 'Marchands & Boutiques';
         $data['menu'] = 'entreprises';
         $data['entreprise'] = Entreprise::whereNull('deleted_at')->findOrFail($id);
@@ -205,6 +221,7 @@ class EntrepriseController extends Controller
      */
     public function users(string $id, Request $request)
     {
+        $this->checkPermission('entreprises.read');
         $data['title'] = 'Utilisateurs de l\'entreprise';
         $data['menu'] = 'entreprises';
         $data['entreprise'] = Entreprise::whereNull('deleted_at')->findOrFail($id);
@@ -253,6 +270,7 @@ class EntrepriseController extends Controller
      */
     public function boutiques(string $id, Request $request)
     {
+        $this->checkPermission('entreprises.read');
         $data['title'] = 'Boutiques de l\'entreprise';
         $data['menu'] = 'entreprises';
         $data['entreprise'] = Entreprise::whereNull('deleted_at')->findOrFail($id);
@@ -308,6 +326,7 @@ class EntrepriseController extends Controller
      */
     public function showBoutique(string $id, string $boutique_id)
     {
+        $this->checkPermission('entreprises.read');
         $data['title'] = 'Détails de la boutique';
         $data['menu'] = 'entreprises';
         $data['entreprise'] = Entreprise::whereNull('deleted_at')->findOrFail($id);
@@ -570,6 +589,7 @@ class EntrepriseController extends Controller
      */
     public function showBoutiqueColis(string $id, string $boutique_id, string $colis_id)
     {
+        $this->checkPermission('entreprises.read');
         $data['title'] = 'Détails du colis';
         $data['menu'] = 'entreprises';
         $data['entreprise'] = Entreprise::whereNull('deleted_at')->findOrFail($id);
@@ -680,6 +700,7 @@ class EntrepriseController extends Controller
      */
     public function showBoutiqueRamassage(string $id, string $boutique_id, string $ramassage_id)
     {
+        $this->checkPermission('entreprises.read');
         $data['title'] = 'Détails du ramassage';
         $data['menu'] = 'entreprises';
         $data['entreprise'] = Entreprise::whereNull('deleted_at')->findOrFail($id);
@@ -720,6 +741,7 @@ class EntrepriseController extends Controller
      */
     public function showBoutiqueLivraison(string $id, string $boutique_id, string $livraison_id)
     {
+        $this->checkPermission('entreprises.read');
         $data['title'] = 'Détails de la livraison';
         $data['menu'] = 'entreprises';
         $data['entreprise'] = Entreprise::whereNull('deleted_at')->findOrFail($id);
@@ -800,6 +822,7 @@ class EntrepriseController extends Controller
      */
     public function showMarchand(string $id, string $marchand_id)
     {
+        $this->checkPermission('entreprises.read');
         $data['title'] = 'Détails du marchand';
         $data['menu'] = 'entreprises';
         $data['entreprise'] = Entreprise::whereNull('deleted_at')->findOrFail($id);
@@ -965,6 +988,7 @@ class EntrepriseController extends Controller
      */
     public function showRamassage(string $id, string $marchand_id, string $ramassage_id)
     {
+        $this->checkPermission('entreprises.read');
         $data['title'] = 'Détails du ramassage';
         $data['menu'] = 'entreprises';
         $data['entreprise'] = Entreprise::whereNull('deleted_at')->findOrFail($id);
@@ -1068,6 +1092,7 @@ class EntrepriseController extends Controller
      */
     public function showLivraison(string $id, string $marchand_id, string $livraison_id)
     {
+        $this->checkPermission('entreprises.read');
         $data['title'] = 'Détails de la livraison';
         $data['menu'] = 'entreprises';
         $data['entreprise'] = Entreprise::whereNull('deleted_at')->findOrFail($id);
@@ -1149,6 +1174,7 @@ class EntrepriseController extends Controller
      */
     public function ramassages(string $id, Request $request)
     {
+        $this->checkPermission('entreprises.read');
         $data['title'] = 'Historique Ramassages';
         $data['menu'] = 'entreprises';
         $data['entreprise'] = Entreprise::whereNull('deleted_at')->findOrFail($id);
@@ -1193,6 +1219,7 @@ class EntrepriseController extends Controller
      */
     public function showRamassageEntreprise(string $id, string $ramassage_id)
     {
+        $this->checkPermission('entreprises.read');
         $data['title'] = 'Détails du ramassage';
         $data['menu'] = 'entreprises';
         $data['entreprise'] = Entreprise::whereNull('deleted_at')->findOrFail($id);
@@ -1239,6 +1266,7 @@ class EntrepriseController extends Controller
      */
     public function livraisons(string $id, Request $request)
     {
+        $this->checkPermission('entreprises.read');
         $data['title'] = 'Historique Livraisons';
         $data['menu'] = 'entreprises';
         $data['entreprise'] = Entreprise::whereNull('deleted_at')->findOrFail($id);
@@ -1286,6 +1314,7 @@ class EntrepriseController extends Controller
      */
     public function colis(string $id, Request $request)
     {
+        $this->checkPermission('entreprises.read');
         $data['title'] = 'Colis';
         $data['menu'] = 'entreprises';
         $data['entreprise'] = Entreprise::whereNull('deleted_at')->findOrFail($id);
@@ -1328,6 +1357,7 @@ class EntrepriseController extends Controller
      */
     public function livreurs(string $id, Request $request)
     {
+        $this->checkPermission('entreprises.read');
         $data['title'] = 'Livreurs';
         $data['menu'] = 'entreprises';
         $data['entreprise'] = Entreprise::whereNull('deleted_at')->findOrFail($id);
@@ -1368,6 +1398,7 @@ class EntrepriseController extends Controller
      */
     public function showLivreur(string $id, string $livreur_id)
     {
+        $this->checkPermission('entreprises.read');
         $data['title'] = 'Détails du livreur';
         $data['menu'] = 'entreprises';
         $data['entreprise'] = Entreprise::whereNull('deleted_at')->findOrFail($id);
@@ -1427,6 +1458,7 @@ class EntrepriseController extends Controller
      */
     public function config(string $id)
     {
+        $this->checkPermission('entreprises.read');
         $data['title'] = 'Configuration';
         $data['menu'] = 'entreprises';
         $data['entreprise'] = Entreprise::whereNull('deleted_at')->findOrFail($id);

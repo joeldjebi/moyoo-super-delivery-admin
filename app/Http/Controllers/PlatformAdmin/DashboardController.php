@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Entreprise;
 use App\Models\SubscriptionPlan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -16,6 +17,10 @@ class DashboardController extends Controller
      */
     public function index()
     {
+        $admin = Auth::guard('platform_admin')->user();
+        if (!$admin || !$admin->hasPermission('dashboard.read')) {
+            abort(403, 'Vous n\'avez pas la permission d\'accéder au dashboard.');
+        }
         // Statistiques globales
         $stats = [
             'total_entreprises' => Schema::hasTable('entreprises')
