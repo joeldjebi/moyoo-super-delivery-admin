@@ -41,145 +41,209 @@
             <div class="menu-inner-shadow"></div>
 
             <ul class="menu-inner py-1">
-                <!-- Tableau de bord -->
-                <li class="menu-item {{ isset($menu) && $menu == 'dashboard' ? 'active' : '' }}">
-                  <a href="{{ route('platform-admin.dashboard') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ti ti-smart-home"></i>
-                    <div data-i18n="Tableau de bord">Tableau de bord</div>
-                  </a>
-                </li>
+                @php
+                    $user = Auth::guard('platform_admin')->user();
+                @endphp
 
-                <li class="menu-header small">
-                  <span class="menu-header-text">Gestion</span>
-                </li>
+                <!-- Tableau de bord -->
+                @if($user && $user->hasPermission('dashboard.read'))
+                    <li class="menu-item {{ isset($menu) && $menu == 'dashboard' ? 'active' : '' }}">
+                      <a href="{{ route('platform-admin.dashboard') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ti ti-smart-home"></i>
+                        <div data-i18n="Tableau de bord">Tableau de bord</div>
+                      </a>
+                    </li>
+                @endif
+
+                @php
+                    $hasGestionItems = ($user && $user->hasPermission('entreprises.read')) ||
+                                      ($user && $user->hasPermission('users.read'));
+                @endphp
+
+                @if($hasGestionItems)
+                    <li class="menu-header small">
+                      <span class="menu-header-text">Gestion</span>
+                    </li>
+                @endif
 
                 <!-- Entreprises -->
-                <li class="menu-item {{ isset($menu) && $menu == 'entreprises' ? 'active' : '' }}">
-                  <a href="{{ route('platform-admin.entreprises.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ti ti-building"></i>
-                    <div data-i18n="Entreprises">Entreprises</div>
-                  </a>
-                </li>
+                @if($user && $user->hasPermission('entreprises.read'))
+                    <li class="menu-item {{ isset($menu) && $menu == 'entreprises' ? 'active' : '' }}">
+                      <a href="{{ route('platform-admin.entreprises.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ti ti-building"></i>
+                        <div data-i18n="Entreprises">Entreprises</div>
+                      </a>
+                    </li>
+                @endif
 
                 <!-- Utilisateurs -->
-                <li class="menu-item {{ isset($menu) && $menu == 'users' ? 'active' : '' }}">
-                  <a href="{{ route('platform-admin.users.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ti ti-users"></i>
-                    <div data-i18n="Utilisateurs">Utilisateurs</div>
-                  </a>
-                </li>
+                @if($user && $user->hasPermission('users.read'))
+                    <li class="menu-item {{ isset($menu) && $menu == 'users' ? 'active' : '' }}">
+                      <a href="{{ route('platform-admin.users.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ti ti-users"></i>
+                        <div data-i18n="Utilisateurs">Utilisateurs</div>
+                      </a>
+                    </li>
+                @endif
 
-                <li class="menu-header small">
-                  <span class="menu-header-text">Administration</span>
-                </li>
+                @php
+                    $hasAdminItems = ($user && $user->hasPermission('admins.read')) ||
+                                    ($user && $user->hasPermission('roles.read')) ||
+                                    ($user && $user->hasPermission('permissions.read'));
+                @endphp
+
+                @if($hasAdminItems)
+                    <li class="menu-header small">
+                      <span class="menu-header-text">Administration</span>
+                    </li>
+                @endif
 
                 <!-- Administrateurs -->
-                <li class="menu-item {{ isset($menu) && ($menu == 'admin-users' || str_contains(request()->route()->getName(), 'admin-users')) ? 'active' : '' }}">
-                  <a href="{{ route('platform-admin.admin-users.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ti ti-user-shield"></i>
-                    <div data-i18n="Administrateurs">Administrateurs</div>
-                  </a>
-                </li>
+                @if($user && $user->hasPermission('admins.read'))
+                    <li class="menu-item {{ isset($menu) && ($menu == 'admin-users' || str_contains(request()->route()->getName() ?? '', 'admin-users')) ? 'active' : '' }}">
+                      <a href="{{ route('platform-admin.admin-users.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ti ti-user-shield"></i>
+                        <div data-i18n="Administrateurs">Administrateurs</div>
+                      </a>
+                    </li>
+                @endif
 
                 <!-- Rôles -->
-                <li class="menu-item {{ isset($menu) && ($menu == 'roles' || str_contains(request()->route()->getName(), 'roles')) ? 'active' : '' }}">
-                  <a href="{{ route('platform-admin.roles.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ti ti-user-circle"></i>
-                    <div data-i18n="Rôles">Rôles</div>
-                  </a>
-                </li>
+                @if($user && $user->hasPermission('roles.read'))
+                    <li class="menu-item {{ isset($menu) && ($menu == 'roles' || str_contains(request()->route()->getName() ?? '', 'roles')) ? 'active' : '' }}">
+                      <a href="{{ route('platform-admin.roles.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ti ti-user-circle"></i>
+                        <div data-i18n="Rôles">Rôles</div>
+                      </a>
+                    </li>
+                @endif
 
                 <!-- Permissions -->
-                <li class="menu-item {{ isset($menu) && ($menu == 'permissions' || str_contains(request()->route()->getName(), 'permissions')) ? 'active' : '' }}">
-                  <a href="{{ route('platform-admin.permissions.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ti ti-shield-check"></i>
-                    <div data-i18n="Permissions">Permissions</div>
-                  </a>
-                </li>
+                @if($user && $user->hasPermission('permissions.read'))
+                    <li class="menu-item {{ isset($menu) && ($menu == 'permissions' || str_contains(request()->route()->getName() ?? '', 'permissions')) ? 'active' : '' }}">
+                      <a href="{{ route('platform-admin.permissions.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ti ti-shield-check"></i>
+                        <div data-i18n="Permissions">Permissions</div>
+                      </a>
+                    </li>
+                @endif
 
-                <li class="menu-header small">
-                  <span class="menu-header-text">Abonnements</span>
-                </li>
+                @php
+                    $hasSubscriptionItems = ($user && $user->hasPermission('pricing_plans.read')) ||
+                                           ($user && $user->hasPermission('subscriptions.read'));
+                @endphp
+
+                @if($hasSubscriptionItems)
+                    <li class="menu-header small">
+                      <span class="menu-header-text">Abonnements</span>
+                    </li>
+                @endif
 
                 <!-- Plans tarifaires -->
-                <li class="menu-item {{ isset($menu) && $menu == 'pricing-plans' ? 'active' : '' }}">
-                  <a href="{{ route('platform-admin.pricing-plans.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ti ti-currency-dollar"></i>
-                    <div data-i18n="Plans tarifaires">Plans tarifaires</div>
-                  </a>
-                </li>
+                @if($user && $user->hasPermission('pricing_plans.read'))
+                    <li class="menu-item {{ isset($menu) && $menu == 'pricing-plans' ? 'active' : '' }}">
+                      <a href="{{ route('platform-admin.pricing-plans.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ti ti-currency-dollar"></i>
+                        <div data-i18n="Plans tarifaires">Plans tarifaires</div>
+                      </a>
+                    </li>
+                @endif
 
                 <!-- Abonnements -->
-                <li class="menu-item {{ isset($menu) && $menu == 'subscriptions' ? 'active' : '' }}">
-                  <a href="{{ route('platform-admin.subscriptions.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ti ti-crown"></i>
-                    <div data-i18n="Abonnements">Abonnements</div>
-                  </a>
-                </li>
+                @if($user && $user->hasPermission('subscriptions.read'))
+                    <li class="menu-item {{ isset($menu) && $menu == 'subscriptions' ? 'active' : '' }}">
+                      <a href="{{ route('platform-admin.subscriptions.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ti ti-crown"></i>
+                        <div data-i18n="Abonnements">Abonnements</div>
+                      </a>
+                    </li>
 
-                <!-- Historique des upgrades -->
-                <li class="menu-item {{ isset($menu) && $menu == 'subscriptions-upgrade-history' ? 'active' : '' }}">
-                  <a href="{{ route('platform-admin.subscriptions.upgrade-history') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ti ti-history"></i>
-                    <div data-i18n="Historique des upgrades">Historique des upgrades</div>
-                  </a>
-                </li>
+                    <!-- Historique des upgrades -->
+                    <li class="menu-item {{ isset($menu) && $menu == 'subscriptions-upgrade-history' ? 'active' : '' }}">
+                      <a href="{{ route('platform-admin.subscriptions.upgrade-history') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ti ti-history"></i>
+                        <div data-i18n="Historique des upgrades">Historique des upgrades</div>
+                      </a>
+                    </li>
+                @endif
 
-                <li class="menu-header small">
-                  <span class="menu-header-text">Données globales</span>
-                </li>
+                @php
+                    $hasGlobalDataItems = ($user && $user->hasPermission('global_data.livraisons')) ||
+                                         ($user && $user->hasPermission('global_data.colis')) ||
+                                         ($user && $user->hasPermission('global_data.ramassages')) ||
+                                         ($user && $user->hasPermission('global_data.livreurs')) ||
+                                         ($user && $user->hasPermission('global_data.boutiques'));
+                @endphp
+
+                @if($hasGlobalDataItems)
+                    <li class="menu-header small">
+                      <span class="menu-header-text">Données globales</span>
+                    </li>
+                @endif
 
                 <!-- Livraisons globales -->
-                <li class="menu-item {{ isset($menu) && $menu == 'global-data-livraisons' ? 'active' : '' }}">
-                  <a href="{{ route('platform-admin.global-data.livraisons') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ti ti-truck"></i>
-                    <div data-i18n="Livraisons">Livraisons</div>
-                  </a>
-                </li>
+                @if($user && $user->hasPermission('global_data.livraisons'))
+                    <li class="menu-item {{ isset($menu) && $menu == 'global-data-livraisons' ? 'active' : '' }}">
+                      <a href="{{ route('platform-admin.global-data.livraisons') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ti ti-truck"></i>
+                        <div data-i18n="Livraisons">Livraisons</div>
+                      </a>
+                    </li>
+                @endif
 
                 <!-- Colis globaux -->
-                <li class="menu-item {{ isset($menu) && $menu == 'global-data-colis' ? 'active' : '' }}">
-                  <a href="{{ route('platform-admin.global-data.colis') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ti ti-box"></i>
-                    <div data-i18n="Colis">Colis</div>
-                  </a>
-                </li>
+                @if($user && $user->hasPermission('global_data.colis'))
+                    <li class="menu-item {{ isset($menu) && $menu == 'global-data-colis' ? 'active' : '' }}">
+                      <a href="{{ route('platform-admin.global-data.colis') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ti ti-box"></i>
+                        <div data-i18n="Colis">Colis</div>
+                      </a>
+                    </li>
+                @endif
 
                 <!-- Ramassages globaux -->
-                <li class="menu-item {{ isset($menu) && $menu == 'global-data-ramassages' ? 'active' : '' }}">
-                  <a href="{{ route('platform-admin.global-data.ramassages') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ti ti-package"></i>
-                    <div data-i18n="Ramassages">Ramassages</div>
-                  </a>
-                </li>
+                @if($user && $user->hasPermission('global_data.ramassages'))
+                    <li class="menu-item {{ isset($menu) && $menu == 'global-data-ramassages' ? 'active' : '' }}">
+                      <a href="{{ route('platform-admin.global-data.ramassages') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ti ti-package"></i>
+                        <div data-i18n="Ramassages">Ramassages</div>
+                      </a>
+                    </li>
+                @endif
 
                 <!-- Livreurs globaux -->
-                <li class="menu-item {{ isset($menu) && $menu == 'global-data-livreurs' ? 'active' : '' }}">
-                  <a href="{{ route('platform-admin.global-data.livreurs') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ti ti-user"></i>
-                    <div data-i18n="Livreurs">Livreurs</div>
-                  </a>
-                </li>
+                @if($user && $user->hasPermission('global_data.livreurs'))
+                    <li class="menu-item {{ isset($menu) && $menu == 'global-data-livreurs' ? 'active' : '' }}">
+                      <a href="{{ route('platform-admin.global-data.livreurs') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ti ti-user"></i>
+                        <div data-i18n="Livreurs">Livreurs</div>
+                      </a>
+                    </li>
+                @endif
 
                 <!-- Boutiques globales -->
-                <li class="menu-item {{ isset($menu) && $menu == 'global-data-boutiques' ? 'active' : '' }}">
-                  <a href="{{ route('platform-admin.global-data.boutiques') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ti ti-building-store"></i>
-                    <div data-i18n="Boutiques">Boutiques</div>
-                  </a>
-                </li>
-
-                <li class="menu-header small">
-                  <span class="menu-header-text">Système</span>
-                </li>
+                @if($user && $user->hasPermission('global_data.boutiques'))
+                    <li class="menu-item {{ isset($menu) && $menu == 'global-data-boutiques' ? 'active' : '' }}">
+                      <a href="{{ route('platform-admin.global-data.boutiques') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ti ti-building-store"></i>
+                        <div data-i18n="Boutiques">Boutiques</div>
+                      </a>
+                    </li>
+                @endif
 
                 <!-- Logs -->
-                <li class="menu-item {{ isset($menu) && $menu == 'logs' ? 'active' : '' }}">
-                  <a href="{{ route('platform-admin.logs.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ti ti-file-text"></i>
-                    <div data-i18n="Logs système">Logs système</div>
-                  </a>
-                </li>
+                @if($user && $user->hasPermission('logs.read'))
+                    <li class="menu-header small">
+                      <span class="menu-header-text">Système</span>
+                    </li>
+
+                    <li class="menu-item {{ isset($menu) && $menu == 'logs' ? 'active' : '' }}">
+                      <a href="{{ route('platform-admin.logs.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ti ti-file-text"></i>
+                        <div data-i18n="Logs système">Logs système</div>
+                      </a>
+                    </li>
+                @endif
               </ul>
           </aside>
           <!-- / Menu -->
