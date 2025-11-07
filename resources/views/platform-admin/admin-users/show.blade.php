@@ -105,23 +105,61 @@
                     <h5 class="mb-0">Actions</h5>
                 </div>
                 <div class="card-body">
-                    <a href="{{ route('platform-admin.admin-users.edit', $admin->id) }}" class="btn btn-primary w-100 mb-2">
-                        <i class="ti ti-edit me-1"></i> Modifier
-                    </a>
-                    <form action="{{ route('platform-admin.admin-users.toggle-status', $admin->id) }}" method="POST" class="mb-2">
-                        @csrf
-                        <button type="submit" class="btn btn-{{ $admin->status === 'active' ? 'warning' : 'success' }} w-100">
-                            <i class="ti ti-toggle-{{ $admin->status === 'active' ? 'left' : 'right' }} me-1"></i>
-                            {{ $admin->status === 'active' ? 'Désactiver' : 'Activer' }}
+                    @php
+                        $currentAdmin = Auth::guard('platform_admin')->user();
+                        $isFirstSuperAdmin = $admin->isFirstSuperAdmin();
+                        $isCurrentUser = $currentAdmin && $admin->id === $currentAdmin->id;
+
+                        $canEdit = !$isFirstSuperAdmin;
+                        $canToggleStatus = !$isFirstSuperAdmin;
+                        $canDelete = !$isFirstSuperAdmin && !$isCurrentUser; // Ne peut pas se supprimer lui-même
+
+                        // Seul le premier super admin peut supprimer d'autres super admins qu'il a créés
+                        if ($admin->isSuperAdmin() && !$isFirstSuperAdmin && !$isCurrentUser) {
+                            $firstSuperAdmin = \App\Models\PlatformAdmin::getFirstSuperAdmin();
+                            $canDelete = $firstSuperAdmin &&
+                                         $currentAdmin->id === $firstSuperAdmin->id &&
+                                         $admin->created_by === $firstSuperAdmin->id;
+                        }
+                    @endphp
+
+                    @if($canEdit)
+                        <a href="{{ route('platform-admin.admin-users.edit', $admin->id) }}" class="btn btn-primary w-100 mb-2">
+                            <i class="ti ti-edit me-1"></i> Modifier
+                        </a>
+                    @else
+                        <button type="button" class="btn btn-secondary w-100 mb-2" disabled>
+                            <i class="ti ti-lock me-1"></i> Modification interdite
                         </button>
-                    </form>
-                    <form action="{{ route('platform-admin.admin-users.destroy', $admin->id) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet administrateur ?');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger w-100">
-                            <i class="ti ti-trash me-1"></i> Supprimer
+                    @endif
+
+                    @if($canToggleStatus)
+                        <form action="{{ route('platform-admin.admin-users.toggle-status', $admin->id) }}" method="POST" class="mb-2">
+                            @csrf
+                            <button type="submit" class="btn btn-{{ $admin->status === 'active' ? 'warning' : 'success' }} w-100">
+                                <i class="ti ti-toggle-{{ $admin->status === 'active' ? 'left' : 'right' }} me-1"></i>
+                                {{ $admin->status === 'active' ? 'Désactiver' : 'Activer' }}
+                            </button>
+                        </form>
+                    @else
+                        <button type="button" class="btn btn-secondary w-100 mb-2" disabled>
+                            <i class="ti ti-lock me-1"></i> Désactivation interdite
                         </button>
-                    </form>
+                    @endif
+
+                    @if($canDelete)
+                        <form action="{{ route('platform-admin.admin-users.destroy', $admin->id) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet administrateur ?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger w-100">
+                                <i class="ti ti-trash me-1"></i> Supprimer
+                            </button>
+                        </form>
+                    @else
+                        <button type="button" class="btn btn-secondary w-100" disabled>
+                            <i class="ti ti-lock me-1"></i> Suppression interdite
+                        </button>
+                    @endif
                 </div>
             </div>
         </div>

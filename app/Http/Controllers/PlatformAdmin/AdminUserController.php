@@ -144,6 +144,12 @@ class AdminUserController extends Controller
     public function edit(string $id)
     {
         $admin = PlatformAdmin::with('roles')->findOrFail($id);
+
+        // Protection du premier super admin : personne ne peut le modifier
+        if ($admin->isFirstSuperAdmin()) {
+            abort(403, 'Le premier super administrateur ne peut pas être modifié.');
+        }
+
         $roles = Role::orderBy('name')->get();
 
         return view('platform-admin.admin-users.edit', [

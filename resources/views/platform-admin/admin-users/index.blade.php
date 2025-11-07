@@ -94,7 +94,14 @@
                         @forelse($admins as $admin)
                             <tr>
                                 <td>{{ $admin->id }}</td>
-                                <td>{{ $admin->username }}</td>
+                                <td>
+                                    {{ $admin->username }}
+                                    @if($admin->isFirstSuperAdmin())
+                                        <span class="badge bg-label-warning ms-2" title="Premier super administrateur - Protégé">
+                                            <i class="ti ti-shield-lock me-1"></i> Premier Super Admin
+                                        </span>
+                                    @endif
+                                </td>
                                 <td>{{ $admin->full_name }}</td>
                                 <td>{{ $admin->email ?? '-' }}</td>
                                 <td>
@@ -117,32 +124,66 @@
                                 <td>{{ $admin->creator->full_name ?? '-' }}</td>
                                 <td>{{ $admin->created_at->format('d/m/Y H:i') }}</td>
                                 <td>
+                                    @php
+                                        $currentAdmin = Auth::guard('platform_admin')->user();
+                                        $isFirstSuperAdmin = $admin->isFirstSuperAdmin();
+                                        $isCurrentUser = $currentAdmin && $admin->id === $currentAdmin->id;
+
+                                        $canEdit = !$isFirstSuperAdmin;
+                                        $canToggleStatus = !$isFirstSuperAdmin;
+                                        $canDelete = !$isFirstSuperAdmin && !$isCurrentUser; // Ne peut pas se supprimer lui-même
+
+                                        // Seul le premier super admin peut supprimer d'autres super admins qu'il a créés
+                                        if ($admin->isSuperAdmin() && !$isFirstSuperAdmin && !$isCurrentUser) {
+                                            $firstSuperAdmin = \App\Models\PlatformAdmin::getFirstSuperAdmin();
+                                            $canDelete = $firstSuperAdmin &&
+                                                         $currentAdmin->id === $firstSuperAdmin->id &&
+                                                         $admin->created_by === $firstSuperAdmin->id;
+                                        }
+                                    @endphp
+
                                     <div class="dropdown">
                                         <button class="btn btn-sm btn-icon" type="button" data-bs-toggle="dropdown">
                                             <i class="ti ti-dots-vertical"></i>
                                         </button>
                                         <ul class="dropdown-menu">
                                             <li><a class="dropdown-item" href="{{ route('platform-admin.admin-users.show', $admin->id) }}"><i class="ti ti-eye me-2"></i> Voir</a></li>
-                                            <li><a class="dropdown-item" href="{{ route('platform-admin.admin-users.edit', $admin->id) }}"><i class="ti ti-edit me-2"></i> Modifier</a></li>
+
+                                            @if($canEdit)
+                                                <li><a class="dropdown-item" href="{{ route('platform-admin.admin-users.edit', $admin->id) }}"><i class="ti ti-edit me-2"></i> Modifier</a></li>
+                                            @else
+                                                <li><span class="dropdown-item text-muted"><i class="ti ti-lock me-2"></i> Modification interdite</span></li>
+                                            @endif
+
                                             <li><hr class="dropdown-divider"></li>
-                                            <li>
-                                                <form action="{{ route('platform-admin.admin-users.toggle-status', $admin->id) }}" method="POST" class="d-inline">
-                                                    @csrf
-                                                    <button type="submit" class="dropdown-item">
-                                                        <i class="ti ti-toggle-{{ $admin->status === 'active' ? 'left' : 'right' }} me-2"></i>
-                                                        {{ $admin->status === 'active' ? 'Désactiver' : 'Activer' }}
-                                                    </button>
-                                                </form>
-                                            </li>
-                                            <li>
-                                                <form action="{{ route('platform-admin.admin-users.destroy', $admin->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet administrateur ?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="dropdown-item text-danger">
-                                                        <i class="ti ti-trash me-2"></i> Supprimer
-                                                    </button>
-                                                </form>
-                                            </li>
+
+                                            @if($canToggleStatus)
+                                                <li>
+                                                    <form action="{{ route('platform-admin.admin-users.toggle-status', $admin->id) }}" method="POST" class="d-inline">
+                                                        @csrf
+                                                        <button type="submit" class="dropdown-item">
+                                                            <i class="ti ti-toggle-{{ $admin->status === 'active' ? 'left' : 'right' }} me-2"></i>
+                                                            {{ $admin->status === 'active' ? 'Désactiver' : 'Activer' }}
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            @else
+                                                <li><span class="dropdown-item text-muted"><i class="ti ti-lock me-2"></i> Désactivation interdite</span></li>
+                                            @endif
+
+                                            @if($canDelete)
+                                                <li>
+                                                    <form action="{{ route('platform-admin.admin-users.destroy', $admin->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet administrateur ?');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="dropdown-item text-danger">
+                                                            <i class="ti ti-trash me-2"></i> Supprimer
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            @else
+                                                <li><span class="dropdown-item text-muted"><i class="ti ti-lock me-2"></i> Suppression interdite</span></li>
+                                            @endif
                                         </ul>
                                     </div>
                                 </td>

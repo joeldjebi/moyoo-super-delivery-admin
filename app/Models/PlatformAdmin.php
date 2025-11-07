@@ -242,6 +242,47 @@ class PlatformAdmin extends Authenticatable
     }
 
     /**
+     * Vérifier si l'admin est le premier super admin
+     * Le premier super admin est celui avec created_by = null et le plus petit ID
+     */
+    public function isFirstSuperAdmin(): bool
+    {
+        // Le premier super admin est celui créé par le système (created_by = null)
+        // et qui a le plus petit ID parmi les super admins
+        if ($this->created_by !== null) {
+            return false;
+        }
+
+        // Vérifier qu'il est super admin
+        if (!$this->isSuperAdmin()) {
+            return false;
+        }
+
+        // Vérifier qu'il a le plus petit ID parmi les super admins créés par le système
+        $firstSuperAdmin = PlatformAdmin::whereNull('created_by')
+            ->whereHas('roles', function ($query) {
+                $query->where('slug', 'super-admin');
+            })
+            ->orderBy('id', 'asc')
+            ->first();
+
+        return $firstSuperAdmin && $firstSuperAdmin->id === $this->id;
+    }
+
+    /**
+     * Obtenir le premier super admin
+     */
+    public static function getFirstSuperAdmin(): ?PlatformAdmin
+    {
+        return static::whereNull('created_by')
+            ->whereHas('roles', function ($query) {
+                $query->where('slug', 'super-admin');
+            })
+            ->orderBy('id', 'asc')
+            ->first();
+    }
+
+    /**
      * Obtenir toutes les permissions de l'admin (via rôles + permissions directes)
      */
     public function getAllPermissions()

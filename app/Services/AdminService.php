@@ -82,6 +82,11 @@ class AdminService
      */
     public function update(PlatformAdmin $admin, array $data, PlatformAdmin $updater): PlatformAdmin
     {
+        // Protection du premier super admin : personne ne peut le modifier
+        if ($admin->isFirstSuperAdmin()) {
+            throw new \Exception('Le premier super administrateur ne peut pas être modifié.');
+        }
+
         return DB::transaction(function () use ($admin, $data, $updater) {
             $oldValues = $admin->toArray();
 
@@ -126,19 +131,27 @@ class AdminService
      */
     public function delete(PlatformAdmin $admin, PlatformAdmin $deleter): bool
     {
+        // Protection du premier super admin : personne ne peut le supprimer
+        if ($admin->isFirstSuperAdmin()) {
+            throw new \Exception('Le premier super administrateur ne peut pas être supprimé.');
+        }
+
         // Vérifications de sécurité
         if ($admin->id === $deleter->id) {
             throw new \Exception('Vous ne pouvez pas supprimer votre propre compte.');
         }
 
+        // Seul le premier super admin peut supprimer d'autres super admins
         if ($admin->isSuperAdmin()) {
-            // Vérifier qu'il n'est pas le dernier super admin
-            $superAdminCount = PlatformAdmin::whereHas('roles', function ($query) {
-                $query->where('slug', 'super-admin');
-            })->count();
+            $firstSuperAdmin = PlatformAdmin::getFirstSuperAdmin();
 
-            if ($superAdminCount <= 1) {
-                throw new \Exception('Impossible de supprimer le dernier super administrateur.');
+            if (!$firstSuperAdmin || $deleter->id !== $firstSuperAdmin->id) {
+                throw new \Exception('Seul le premier super administrateur peut supprimer d\'autres super administrateurs.');
+            }
+
+            // Vérifier que le super admin à supprimer a été créé par le premier super admin
+            if ($admin->created_by !== $firstSuperAdmin->id) {
+                throw new \Exception('Vous ne pouvez supprimer que les super administrateurs que vous avez créés.');
             }
         }
 
@@ -166,6 +179,11 @@ class AdminService
      */
     public function toggleStatus(PlatformAdmin $admin, PlatformAdmin $changer): PlatformAdmin
     {
+        // Protection du premier super admin : personne ne peut le désactiver
+        if ($admin->isFirstSuperAdmin()) {
+            throw new \Exception('Le premier super administrateur ne peut pas être désactivé.');
+        }
+
         // Vérifications de sécurité
         if ($admin->isSuperAdmin() && $admin->status === 'active') {
             // Vérifier qu'il n'est pas le dernier super admin actif
