@@ -92,6 +92,13 @@ class RoleController extends Controller
         }
 
         $role = Role::with(['admins', 'permissions'])->findOrFail($id);
+
+        // Si la relation ne fonctionne pas, utiliser le fallback
+        if ($role->permissions->count() === 0) {
+            $permissions = $role->getPermissionsWithFallback();
+            $role->setRelation('permissions', $permissions);
+        }
+
         return view('platform-admin.roles.show', [
             'menu' => 'roles',
             'role' => $role,
@@ -104,6 +111,13 @@ class RoleController extends Controller
     public function edit(string $id)
     {
         $role = Role::with('permissions')->findOrFail($id);
+
+        // Si la relation ne fonctionne pas, utiliser le fallback
+        if ($role->permissions->count() === 0) {
+            $permissions = $role->getPermissionsWithFallback();
+            $role->setRelation('permissions', $permissions);
+        }
+
         $permissions = Permission::orderBy('resource')->orderBy('action')->get()->groupBy('resource');
 
         return view('platform-admin.roles.edit', [

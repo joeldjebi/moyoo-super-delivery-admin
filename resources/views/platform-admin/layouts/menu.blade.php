@@ -149,6 +149,16 @@
                     </li>
                 @endif
 
+                <!-- Modules -->
+                @if($user && $user->hasPermission('pricing_plans.read'))
+                    <li class="menu-item {{ isset($menu) && $menu == 'modules' ? 'active' : '' }}">
+                      <a href="{{ route('platform-admin.modules.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ti ti-package"></i>
+                        <div data-i18n="Modules">Modules</div>
+                      </a>
+                    </li>
+                @endif
+
                 <!-- Abonnements -->
                 @if($user && $user->hasPermission('subscriptions.read'))
                     <li class="menu-item {{ isset($menu) && $menu == 'subscriptions' ? 'active' : '' }}">

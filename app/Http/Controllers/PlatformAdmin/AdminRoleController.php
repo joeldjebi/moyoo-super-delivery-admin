@@ -18,7 +18,18 @@ class AdminRoleController extends Controller
     public function __construct(ActivityLogService $activityLogService)
     {
         $this->activityLogService = $activityLogService;
-        $this->middleware('permission:admins.update')->only(['assignRoles', 'removeRole', 'assignPermissions', 'removePermission']);
+    }
+
+    /**
+     * Vérifier la permission avant d'exécuter les méthodes
+     */
+    private function checkPermission(string $permission): void
+    {
+        $admin = Auth::guard('platform_admin')->user();
+
+        if (!$admin || !$admin->hasPermission($permission)) {
+            abort(403, 'Vous n\'avez pas la permission requise.');
+        }
     }
 
     /**
@@ -26,6 +37,8 @@ class AdminRoleController extends Controller
      */
     public function assignRoles(Request $request, string $id)
     {
+        $this->checkPermission('admins.update');
+
         $request->validate([
             'roles' => ['required', 'array'],
             'roles.*' => ['exists:roles,id'],
@@ -73,6 +86,8 @@ class AdminRoleController extends Controller
      */
     public function removeRole(Request $request, string $id, string $roleId)
     {
+        $this->checkPermission('admins.update');
+
         try {
             $admin = PlatformAdmin::findOrFail($id);
             $role = Role::findOrFail($roleId);
@@ -112,6 +127,8 @@ class AdminRoleController extends Controller
      */
     public function assignPermissions(Request $request, string $id)
     {
+        $this->checkPermission('admins.update');
+
         $request->validate([
             'permissions' => ['required', 'array'],
             'permissions.*' => ['exists:permissions,id'],
@@ -151,6 +168,8 @@ class AdminRoleController extends Controller
      */
     public function removePermission(Request $request, string $id, string $permissionId)
     {
+        $this->checkPermission('admins.update');
+
         try {
             $admin = PlatformAdmin::findOrFail($id);
             $permission = Permission::findOrFail($permissionId);

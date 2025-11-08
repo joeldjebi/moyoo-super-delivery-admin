@@ -56,6 +56,7 @@ Route::prefix('platform-admin')->name('platform-admin.')->group(function () {
         Route::get('entreprises-{id}-livreurs-{livreur_id}', [App\Http\Controllers\PlatformAdmin\EntrepriseController::class, 'showLivreur'])->name('entreprises.livreur.show');
         Route::get('entreprises-{id}-livreurs', [App\Http\Controllers\PlatformAdmin\EntrepriseController::class, 'livreurs'])->name('entreprises.livreurs');
         Route::get('entreprises-{id}-config', [App\Http\Controllers\PlatformAdmin\EntrepriseController::class, 'config'])->name('entreprises.config');
+        Route::get('entreprises-{id}-tarifs-livraison', [App\Http\Controllers\PlatformAdmin\EntrepriseController::class, 'tarifsLivraison'])->name('entreprises.tarifs-livraison');
 
         // Gestion des utilisateurs
         Route::get('users', [App\Http\Controllers\PlatformAdmin\UserController::class, 'index'])->name('users.index');
@@ -112,5 +113,12 @@ Route::prefix('platform-admin')->name('platform-admin.')->group(function () {
         Route::delete('admin-users/{id}-roles-{roleId}', [App\Http\Controllers\PlatformAdmin\AdminRoleController::class, 'removeRole'])->name('admin-users.remove-role');
         Route::post('admin-users/{id}/assign-permissions', [App\Http\Controllers\PlatformAdmin\AdminRoleController::class, 'assignPermissions'])->name('admin-users.assign-permissions');
         Route::delete('admin-users/{id}/permissions/{permissionId}', [App\Http\Controllers\PlatformAdmin\AdminRoleController::class, 'removePermission'])->name('admin-users.remove-permission');
+
+        // Gestion des modules
+        Route::get('modules', [App\Http\Controllers\PlatformAdmin\ModuleController::class, 'index'])->name('modules.index');
+        Route::post('pricing-plans/{pricingPlan}/modules/attach', [App\Http\Controllers\PlatformAdmin\ModuleController::class, 'attachToPricingPlan'])->name('modules.attach');
+        Route::delete('pricing-plans/{pricingPlan}/modules/{module}/detach', [App\Http\Controllers\PlatformAdmin\ModuleController::class, 'detachFromPricingPlan'])->name('modules.detach');
+        Route::put('pricing-plans/{pricingPlan}/modules/{module}/limits', [App\Http\Controllers\PlatformAdmin\ModuleController::class, 'updateLimits'])->name('modules.update-limits');
+        Route::post('pricing-plans/{pricingPlan}/modules/update', [App\Http\Controllers\PlatformAdmin\ModuleController::class, 'updateModulesForPricingPlan'])->name('modules.update-for-plan');
     });
 });

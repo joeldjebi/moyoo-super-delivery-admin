@@ -263,6 +263,10 @@
                                                     <a class="dropdown-item" href="{{ route('platform-admin.entreprises.users', $entreprise->id) }}">
                                                         <i class="ti ti-users me-1"></i> Utilisateurs de l'entreprise
                                                     </a>
+                                                    <a class="dropdown-item" href="{{ route('platform-admin.entreprises.tarifs-livraison', $entreprise->id) }}">
+                                                        <i class="ti ti-truck-delivery me-1"></i> Tarifs de livraison
+                                                    </a>
+                                                    <div class="dropdown-divider"></div>
                                                     <form action="{{ route('platform-admin.entreprises.toggle-status', $entreprise->id) }}" method="POST" class="d-inline">
                                                         @csrf
                                                         @if(($entreprise->statut ?? 0) == 1)

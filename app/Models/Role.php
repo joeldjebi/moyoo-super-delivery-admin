@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 class Role extends Model
 {
@@ -37,6 +39,36 @@ class Role extends Model
     {
         return $this->belongsToMany(Permission::class, 'role_permissions', 'role_id', 'permission_id')
             ->withTimestamps();
+    }
+
+    /**
+     * Obtenir les permissions avec fallback si la relation ne fonctionne pas
+     */
+    public function getPermissionsWithFallback()
+    {
+        // Essayer d'abord la relation normale
+        $permissions = $this->permissions;
+
+        if ($permissions->count() > 0) {
+            return $permissions;
+        }
+
+        // Si la relation ne fonctionne pas, charger manuellement
+        $hasRoleId = Schema::hasColumn('role_permissions', 'role_id');
+
+        if ($hasRoleId) {
+            $permissionIds = DB::table('role_permissions')
+                ->where('role_id', $this->id)
+                ->pluck('permission_id');
+        } else {
+            // Utiliser la colonne 'role' si role_id n'existe pas
+            $permissionIds = DB::table('role_permissions')
+                ->where('role', $this->slug)
+                ->orWhere('role', $this->name)
+                ->pluck('permission_id');
+        }
+
+        return Permission::whereIn('id', $permissionIds)->get();
     }
 
     /**

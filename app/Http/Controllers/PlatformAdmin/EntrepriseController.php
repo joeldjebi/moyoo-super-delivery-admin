@@ -1454,6 +1454,112 @@ class EntrepriseController extends Controller
     }
 
     /**
+     * Afficher les tarifs de livraison de l'entreprise
+     */
+    public function tarifsLivraison(string $id, Request $request)
+    {
+        $this->checkPermission('entreprises.read');
+        $data['title'] = 'Tarifs de livraison';
+        $data['menu'] = 'entreprises';
+        $data['entreprise'] = Entreprise::whereNull('deleted_at')->findOrFail($id);
+
+        // Récupérer les tarifs de livraison avec les relations
+        $query = DB::table('tarif_livraisons')
+            ->leftJoin('communes as commune_depart', 'tarif_livraisons.commune_depart_id', '=', 'commune_depart.id')
+            ->leftJoin('communes as commune_arrivee', 'tarif_livraisons.commune_id', '=', 'commune_arrivee.id')
+            ->leftJoin('type_engins', 'tarif_livraisons.type_engin_id', '=', 'type_engins.id')
+            ->leftJoin('mode_livraisons', 'tarif_livraisons.mode_livraison_id', '=', 'mode_livraisons.id')
+            ->leftJoin('poids', 'tarif_livraisons.poids_id', '=', 'poids.id')
+            ->leftJoin('temps', 'tarif_livraisons.temp_id', '=', 'temps.id')
+            ->where('tarif_livraisons.entreprise_id', $id)
+            ->whereNull('tarif_livraisons.deleted_at')
+            ->select(
+                'tarif_livraisons.*',
+                'commune_depart.libelle as commune_depart_nom',
+                'commune_arrivee.libelle as commune_arrivee_nom',
+                'type_engins.libelle as type_engin_nom',
+                'mode_livraisons.libelle as mode_livraison_nom',
+                'poids.libelle as poids_nom',
+                'temps.libelle as temps_nom'
+            );
+
+        // Recherche textuelle
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('commune_depart.libelle', 'like', "%{$search}%")
+                  ->orWhere('commune_arrivee.libelle', 'like', "%{$search}%")
+                  ->orWhere('type_engins.libelle', 'like', "%{$search}%")
+                  ->orWhere('mode_livraisons.libelle', 'like', "%{$search}%")
+                  ->orWhere('poids.libelle', 'like', "%{$search}%")
+                  ->orWhere('temps.libelle', 'like', "%{$search}%");
+            });
+        }
+
+        // Filtres - chaque filtre fonctionne individuellement
+        if ($request->filled('commune_depart_id')) {
+            $query->where('tarif_livraisons.commune_depart_id', (int)$request->commune_depart_id);
+        }
+
+        if ($request->filled('commune_arrivee_id')) {
+            $query->where('tarif_livraisons.commune_id', (int)$request->commune_arrivee_id);
+        }
+
+        if ($request->filled('type_engin_id')) {
+            $query->where('tarif_livraisons.type_engin_id', (int)$request->type_engin_id);
+        }
+
+        if ($request->filled('mode_livraison_id')) {
+            $query->where('tarif_livraisons.mode_livraison_id', (int)$request->mode_livraison_id);
+        }
+
+        if ($request->filled('poids_id')) {
+            $query->where('tarif_livraisons.poids_id', (int)$request->poids_id);
+        }
+
+        if ($request->filled('temps_id')) {
+            $query->where('tarif_livraisons.temp_id', (int)$request->temps_id);
+        }
+
+        // Tri
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
+
+        // Pagination
+        $perPage = $request->get('per_page', 15);
+        $data['tarifs'] = $query->paginate($perPage)->appends($request->query());
+
+        // Récupérer les listes pour les filtres
+        $data['communes'] = DB::table('communes')
+            ->whereNull('deleted_at')
+            ->orderBy('libelle')
+            ->pluck('libelle', 'id');
+
+        $data['type_engins'] = DB::table('type_engins')
+            ->whereNull('deleted_at')
+            ->orderBy('libelle')
+            ->pluck('libelle', 'id');
+
+        $data['mode_livraisons'] = DB::table('mode_livraisons')
+            ->whereNull('deleted_at')
+            ->orderBy('libelle')
+            ->pluck('libelle', 'id');
+
+        $data['poids'] = DB::table('poids')
+            ->whereNull('deleted_at')
+            ->orderBy('libelle')
+            ->pluck('libelle', 'id');
+
+        $data['temps'] = DB::table('temps')
+            ->whereNull('deleted_at')
+            ->orderBy('libelle')
+            ->pluck('libelle', 'id');
+
+        return view('platform-admin.entreprises.tarifs-livraison', $data);
+    }
+
+    /**
      * Afficher la configuration de l'entreprise
      */
     public function config(string $id)
