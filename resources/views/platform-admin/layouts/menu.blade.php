@@ -130,7 +130,8 @@
 
                 @php
                     $hasSubscriptionItems = ($user && $user->hasPermission('pricing_plans.read')) ||
-                                           ($user && $user->hasPermission('subscriptions.read'));
+                                           ($user && $user->hasPermission('subscriptions.read')) ||
+                                           ($user && $user->isSuperAdmin());
                 @endphp
 
                 @if($hasSubscriptionItems)
@@ -140,7 +141,7 @@
                 @endif
 
                 <!-- Plans tarifaires -->
-                @if($user && $user->hasPermission('pricing_plans.read'))
+                @if($user && ($user->isSuperAdmin() || $user->hasPermission('pricing_plans.read')))
                     <li class="menu-item {{ isset($menu) && $menu == 'pricing-plans' ? 'active' : '' }}">
                       <a href="{{ route('platform-admin.pricing-plans.index') }}" class="menu-link">
                         <i class="menu-icon tf-icons ti ti-currency-dollar"></i>
@@ -150,7 +151,7 @@
                 @endif
 
                 <!-- Modules -->
-                @if($user && $user->hasPermission('pricing_plans.read'))
+                @if($user && ($user->isSuperAdmin() || $user->hasPermission('pricing_plans.read')))
                     <li class="menu-item {{ isset($menu) && $menu == 'modules' ? 'active' : '' }}">
                       <a href="{{ route('platform-admin.modules.index') }}" class="menu-link">
                         <i class="menu-icon tf-icons ti ti-package"></i>

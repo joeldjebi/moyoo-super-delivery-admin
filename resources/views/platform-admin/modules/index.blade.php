@@ -19,6 +19,92 @@
         </div>
     @endif
 
+    <!-- Liste des modules avec leurs prix -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0">
+                    <i class="ti ti-package me-2"></i>Liste des modules
+                </h5>
+                <p class="text-muted mb-0">
+                    Gérez les paramètres des modules.
+                    <strong>Seul le module "Gestion de Stock" peut être optionnel</strong> et avoir un prix.
+                </p>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Module</th>
+                            <th>Description</th>
+                            <th>Catégorie</th>
+                            <th>Prix</th>
+                            <th>Type</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($modules as $module)
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        @if($module->icon)
+                                            <i class="ti {{ $module->icon }} me-2 text-primary"></i>
+                                        @endif
+                                        <strong>{{ $module->name }}</strong>
+                                    </div>
+                                </td>
+                                <td>
+                                    <small class="text-muted">{{ $module->description ?? 'N/A' }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-label-{{ $module->category === 'premium' ? 'warning' : ($module->category === 'advanced' ? 'info' : 'success') }}">
+                                        {{ ucfirst($module->category) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    @if($module->slug === 'stock_management' && $module->is_optional)
+                                        <strong class="text-primary">{{ $module->getFormattedPrice() }}</strong>
+                                    @elseif($module->slug === 'stock_management')
+                                        <span class="badge bg-label-warning">Prix non configuré</span>
+                                    @else
+                                        <span class="badge bg-label-info">Inclus dans le plan</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($module->slug === 'stock_management')
+                                        <span class="badge bg-label-warning">
+                                            <i class="ti ti-shopping-cart me-1"></i>Optionnel
+                                        </span>
+                                    @else
+                                        <span class="badge bg-label-success">
+                                            <i class="ti ti-check me-1"></i>Inclus
+                                        </span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($module->is_active)
+                                        <span class="badge bg-label-success">Actif</span>
+                                    @else
+                                        <span class="badge bg-label-danger">Inactif</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <a href="{{ route('platform-admin.modules.edit', $module->id) }}" class="btn btn-sm btn-primary">
+                                        <i class="ti ti-edit"></i> Modifier
+                                    </a>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <div class="card">
         <div class="card-header">
             <h5 class="mb-0">
@@ -99,6 +185,15 @@
                                                                         @endif
                                                                         <div>
                                                                             <strong>{{ $module->name }}</strong>
+                                                                            @if($module->slug === 'stock_management')
+                                                                                <br><small class="badge bg-label-warning">
+                                                                                    <i class="ti ti-shopping-cart me-1"></i>Module optionnel
+                                                                                </small>
+                                                                            @else
+                                                                                <br><small class="badge bg-label-success">
+                                                                                    <i class="ti ti-check me-1"></i>Module inclus
+                                                                                </small>
+                                                                            @endif
                                                                             @if($module->description)
                                                                                 <br><small class="text-muted">{{ $module->description }}</small>
                                                                             @endif
@@ -112,7 +207,33 @@
                                                                 </div>
                                                                 <div class="col-md-5">
                                                                     <div class="limits-container" id="limits-{{ $plan->id }}-{{ $module->id }}" style="display: {{ $isEnabled ? 'block' : 'none' }};">
-                                                                        @if(in_array($module->slug, ['colis_management', 'livreur_management', 'marchand_management', 'user_management']))
+                                                                        @if($module->slug === 'stock_management')
+                                                                            {{-- Configuration spéciale pour le module Stock --}}
+                                                                            <div class="alert alert-info mb-2 py-2">
+                                                                                <small>
+                                                                                    <i class="ti ti-info-circle me-1"></i>
+                                                                                    <strong>Module optionnel</strong> - Prix: {{ $module->is_optional && $module->price ? number_format($module->price, 0, ',', ' ') . ' ' . $module->currency : 'Non configuré' }}
+                                                                                </small>
+                                                                            </div>
+                                                                            <label class="form-label small">Limites du module Stock</label>
+                                                                            <div class="row g-2">
+                                                                                <div class="col-6">
+                                                                                    <input type="number"
+                                                                                           class="form-control form-control-sm"
+                                                                                           name="modules[{{ $module->id }}][limits][max_products]"
+                                                                                           value="{{ $limits['max_products'] ?? '' }}"
+                                                                                           placeholder="Max produits">
+                                                                                </div>
+                                                                                <div class="col-6">
+                                                                                    <input type="number"
+                                                                                           class="form-control form-control-sm"
+                                                                                           name="modules[{{ $module->id }}][limits][max_categories]"
+                                                                                           value="{{ $limits['max_categories'] ?? '' }}"
+                                                                                           placeholder="Max catégories">
+                                                                                </div>
+                                                                            </div>
+                                                                            <small class="text-muted">Laisser vide pour illimité</small>
+                                                                        @elseif(in_array($module->slug, ['colis_management', 'livreur_management', 'marchand_management', 'user_management']))
                                                                             @if($module->slug === 'colis_management')
                                                                                 <label class="form-label small">Limite mensuelle de colis</label>
                                                                                 <input type="number"

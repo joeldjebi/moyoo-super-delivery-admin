@@ -79,4 +79,63 @@ class PricingPlan extends Model
 
         return $pivot && $pivot->pivot->limits ? $pivot->pivot->limits : null;
     }
+
+    /**
+     * Attacher un module au plan
+     */
+    public function attachModule(int $moduleId, bool $isEnabled = true, ?array $limits = null): void
+    {
+        // Vérifier si le module est déjà attaché
+        if ($this->modules()->where('modules.id', $moduleId)->exists()) {
+            // Mettre à jour le pivot existant
+            $this->modules()->updateExistingPivot($moduleId, [
+                'is_enabled' => $isEnabled,
+                'limits' => $limits ? json_encode($limits) : null,
+            ]);
+        } else {
+            // Attacher le module
+            $this->modules()->attach($moduleId, [
+                'is_enabled' => $isEnabled,
+                'limits' => $limits ? json_encode($limits) : null,
+            ]);
+        }
+    }
+
+    /**
+     * Détacher un module du plan
+     */
+    public function detachModule(int $moduleId): void
+    {
+        $this->modules()->detach($moduleId);
+    }
+
+    /**
+     * Activer/désactiver un module pour le plan
+     */
+    public function toggleModule(int $moduleId): bool
+    {
+        $module = $this->modules()->where('modules.id', $moduleId)->first();
+
+        if (!$module) {
+            return false;
+        }
+
+        $isEnabled = !$module->pivot->is_enabled;
+
+        $this->modules()->updateExistingPivot($moduleId, [
+            'is_enabled' => $isEnabled,
+        ]);
+
+        return $isEnabled;
+    }
+
+    /**
+     * Configurer les limites d'un module
+     */
+    public function configureModule(int $moduleId, array $limits): void
+    {
+        $this->modules()->updateExistingPivot($moduleId, [
+            'limits' => json_encode($limits),
+        ]);
+    }
 }

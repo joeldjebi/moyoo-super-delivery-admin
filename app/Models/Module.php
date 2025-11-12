@@ -16,12 +16,17 @@ class Module extends Model
         'is_active',
         'sort_order',
         'routes',
+        'price',
+        'currency',
+        'is_optional',
     ];
 
     protected $casts = [
         'routes' => 'array',
         'is_active' => 'boolean',
+        'is_optional' => 'boolean',
         'sort_order' => 'integer',
+        'price' => 'decimal:2',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -90,5 +95,40 @@ class Module extends Model
             ->first();
 
         return $pivot && $pivot->pivot->limits ? $pivot->pivot->limits : null;
+    }
+
+    /**
+     * Scope pour les modules optionnels
+     */
+    public function scopeOptional($query)
+    {
+        return $query->where('is_optional', true);
+    }
+
+    /**
+     * Scope pour les modules non optionnels (inclus dans le plan)
+     */
+    public function scopeIncluded($query)
+    {
+        return $query->where('is_optional', false);
+    }
+
+    /**
+     * Vérifier si le module est optionnel
+     */
+    public function isOptional(): bool
+    {
+        return $this->is_optional === true;
+    }
+
+    /**
+     * Obtenir le prix formaté
+     */
+    public function getFormattedPrice(): string
+    {
+        if (!$this->price) {
+            return 'Gratuit';
+        }
+        return number_format($this->price, 0, ',', ' ') . ' ' . $this->currency;
     }
 }

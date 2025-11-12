@@ -61,7 +61,7 @@
                             <th>Nom</th>
                             <th>Prix</th>
                             <th>Période</th>
-                            <th>Devise</th>
+                            <th>Modules attachés</th>
                             <th>Populaire</th>
                             <th>Statut</th>
                             <th>Créé le</th>
@@ -86,7 +86,25 @@
                                         <span class="badge bg-label-primary">Annuel</span>
                                     @endif
                                 </td>
-                                <td>{{ $plan->currency ?? 'XOF' }}</td>
+                                <td>
+                                    @if($plan->modules && $plan->modules->count() > 0)
+                                        <div class="d-flex flex-wrap gap-1">
+                                            @foreach($plan->modules as $module)
+                                                @if($module->pivot->is_enabled)
+                                                    <span class="badge bg-label-success" title="{{ $module->name }}">
+                                                        {{ $module->slug === 'stock_management' ? 'Stock' : $module->name }}
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-label-secondary" title="{{ $module->name }} (désactivé)">
+                                                        {{ $module->slug === 'stock_management' ? 'Stock' : $module->name }}
+                                                    </span>
+                                                @endif
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <span class="text-muted">Aucun module</span>
+                                    @endif
+                                </td>
                                 <td>
                                     @if($plan->is_popular ?? false)
                                         <span class="badge bg-label-success">Oui</span>

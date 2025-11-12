@@ -227,6 +227,20 @@ class ModuleSeeder extends Seeder
                 'sort_order' => 21,
                 'routes' => ['api.documentation'],
             ],
+            // Module Stock (optionnel)
+            [
+                'name' => 'Gestion de Stock',
+                'slug' => 'stock_management',
+                'description' => 'Gestion complète du stock : produits, catégories, inventaire',
+                'icon' => 'ti-warehouse',
+                'category' => 'premium',
+                'is_active' => true,
+                'is_optional' => true,
+                'price' => null,
+                'currency' => 'XOF',
+                'sort_order' => 22,
+                'routes' => ['stock.index', 'stock.products', 'stock.categories'],
+            ],
         ];
 
         // Créer ou mettre à jour les modules

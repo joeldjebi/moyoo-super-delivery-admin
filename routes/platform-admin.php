@@ -66,6 +66,12 @@ Route::prefix('platform-admin')->name('platform-admin.')->group(function () {
         // Gestion des plans tarifaires
         Route::resource('pricing-plans', App\Http\Controllers\PlatformAdmin\PricingPlanController::class);
 
+        // Gestion des modules pour les pricing plans
+        Route::post('pricing-plans/{plan}/modules/{module}/attach', [App\Http\Controllers\PlatformAdmin\PricingPlanController::class, 'attachModule'])->name('pricing-plans.modules.attach');
+        Route::post('pricing-plans/{plan}/modules/{module}/detach', [App\Http\Controllers\PlatformAdmin\PricingPlanController::class, 'detachModule'])->name('pricing-plans.modules.detach');
+        Route::post('pricing-plans/{plan}/modules/{module}/toggle', [App\Http\Controllers\PlatformAdmin\PricingPlanController::class, 'toggleModule'])->name('pricing-plans.modules.toggle');
+        Route::put('pricing-plans/{plan}/modules/{module}/configure', [App\Http\Controllers\PlatformAdmin\PricingPlanController::class, 'configureModule'])->name('pricing-plans.modules.configure');
+
         // Gestion des abonnements
         // Routes spécifiques en premier pour éviter les conflits
         Route::get('subscriptions/upgrade-history', [App\Http\Controllers\PlatformAdmin\SubscriptionController::class, 'upgradeHistory'])->name('subscriptions.upgrade-history');
@@ -116,9 +122,11 @@ Route::prefix('platform-admin')->name('platform-admin.')->group(function () {
 
         // Gestion des modules
         Route::get('modules', [App\Http\Controllers\PlatformAdmin\ModuleController::class, 'index'])->name('modules.index');
-        Route::post('pricing-plans/{pricingPlan}/modules/attach', [App\Http\Controllers\PlatformAdmin\ModuleController::class, 'attachToPricingPlan'])->name('modules.attach');
-        Route::delete('pricing-plans/{pricingPlan}/modules/{module}/detach', [App\Http\Controllers\PlatformAdmin\ModuleController::class, 'detachFromPricingPlan'])->name('modules.detach');
-        Route::put('pricing-plans/{pricingPlan}/modules/{module}/limits', [App\Http\Controllers\PlatformAdmin\ModuleController::class, 'updateLimits'])->name('modules.update-limits');
-        Route::post('pricing-plans/{pricingPlan}/modules/update', [App\Http\Controllers\PlatformAdmin\ModuleController::class, 'updateModulesForPricingPlan'])->name('modules.update-for-plan');
+        Route::get('modules-{module}-edit', [App\Http\Controllers\PlatformAdmin\ModuleController::class, 'edit'])->name('modules.edit');
+        Route::put('modules/{module}', [App\Http\Controllers\PlatformAdmin\ModuleController::class, 'update'])->name('modules.update');
+        Route::post('pricing-plans-{pricingPlan}-modules/attach', [App\Http\Controllers\PlatformAdmin\ModuleController::class, 'attachToPricingPlan'])->name('modules.attach');
+        Route::delete('pricing-plans-{pricingPlan}-modules-{module}/detach', [App\Http\Controllers\PlatformAdmin\ModuleController::class, 'detachFromPricingPlan'])->name('modules.detach');
+        Route::put('pricing-plans-{pricingPlan}-modules-{module}/limits', [App\Http\Controllers\PlatformAdmin\ModuleController::class, 'updateLimits'])->name('modules.update-limits');
+        Route::post('pricing-plans-{pricingPlan}-modules/update', [App\Http\Controllers\PlatformAdmin\ModuleController::class, 'updateModulesForPricingPlan'])->name('modules.update-for-plan');
     });
 });

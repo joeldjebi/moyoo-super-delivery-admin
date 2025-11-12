@@ -27,8 +27,8 @@ class ModuleController extends Controller
             ->orderBy('name', 'asc')
             ->get();
 
-        $modules = Module::active()
-            ->orderBy('category', 'asc')
+        // Récupérer tous les modules (actifs et inactifs) pour la gestion
+        $modules = Module::orderBy('category', 'asc')
             ->orderBy('sort_order', 'asc')
             ->orderBy('name', 'asc')
             ->get();
@@ -167,8 +167,8 @@ class ModuleController extends Controller
             abort(403, 'Vous n\'avez pas la permission de modifier les plans tarifaires.');
         }
 
-        // Récupérer tous les modules pour traiter même ceux non cochés
-        $allModules = Module::active()->get();
+        // Récupérer tous les modules (actifs et inactifs) pour traiter même ceux non cochés
+        $allModules = Module::get();
         $submittedModules = $request->input('modules', []);
 
         DB::beginTransaction();
@@ -234,5 +234,106 @@ class ModuleController extends Controller
                 ->withInput()
                 ->with('error', "Erreur lors de la mise à jour : {$e->getMessage()}");
         }
+    }
+
+    /**
+     * Afficher le formulaire d'édition d'un module
+     */
+    public function edit(Module $module)
+    {
+        $admin = Auth::guard('platform_admin')->user();
+        if (!$admin || !$admin->isSuperAdmin()) {
+            abort(403, 'Seuls les super administrateurs peuvent modifier les modules.');
+        }
+
+        return view('platform-admin.modules.edit', [
+            'menu' => 'modules',
+            'module' => $module,
+        ]);
+    }
+
+    /**
+     * Mettre à jour un module (notamment son prix)
+     */
+    public function update(Request $request, Module $module)
+    {
+        $admin = Auth::guard('platform_admin')->user();
+        if (!$admin || !$admin->isSuperAdmin()) {
+            abort(403, 'Seuls les super administrateurs peuvent modifier les modules.');
+        }
+
+        // Règles de validation conditionnelles
+        $rules = [
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'icon' => 'nullable|string|max:255',
+            'category' => 'required|string|in:core,advanced,premium',
+            'is_active' => 'nullable',
+            'is_optional' => 'nullable',
+            'sort_order' => 'nullable|integer|min:0',
+        ];
+
+        // Seul le module stock_management peut être optionnel
+        if ($module->slug === 'stock_management') {
+            $rules['price'] = 'nullable|numeric|min:0';
+            $rules['currency'] = 'nullable|string|max:3';
+        } else {
+            $rules['price'] = 'nullable';
+            $rules['currency'] = 'nullable|string|max:3';
+        }
+
+        $validated = $request->validate($rules);
+
+        // Convertir les valeurs des checkboxes en boolean
+        $validated['is_active'] = $request->has('is_active') ? (bool)$request->input('is_active') : false;
+
+        // Seul le module stock_management peut être optionnel
+        if ($module->slug === 'stock_management') {
+            $validated['is_optional'] = $request->has('is_optional') ? (bool)$request->input('is_optional') : false;
+
+            // Si le module n'est pas optionnel, supprimer le prix
+            if (!$validated['is_optional']) {
+                // Retirer price et currency du tableau pour éviter les erreurs NOT NULL
+                unset($validated['price']);
+                unset($validated['currency']);
+                // Mettre à jour directement avec DB pour forcer null
+                DB::table('modules')
+                    ->where('id', $module->id)
+                    ->update([
+                        'price' => null,
+                        'currency' => null,
+                    ]);
+            } else {
+                // Si optionnel mais pas de prix, mettre currency par défaut
+                if (empty($validated['currency'])) {
+                    $validated['currency'] = 'XOF';
+                }
+            }
+        } else {
+            $validated['is_optional'] = false;
+            // Retirer price et currency du tableau pour éviter les erreurs NOT NULL
+            unset($validated['price']);
+            unset($validated['currency']);
+            // Mettre à jour directement avec DB pour forcer null
+            DB::table('modules')
+                ->where('id', $module->id)
+                ->update([
+                    'price' => null,
+                    'currency' => null,
+                ]);
+        }
+
+        // Mettre à jour les autres champs
+        $module->update($validated);
+
+        Log::info('Module mis à jour', [
+            'admin_id' => $admin->id,
+            'module_id' => $module->id,
+            'module_data' => $validated,
+        ]);
+
+        return redirect()
+            ->route('platform-admin.modules.index')
+            ->with('success', "Le module \"{$module->name}\" a été mis à jour avec succès.");
     }
 }

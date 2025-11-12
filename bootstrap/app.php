@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\CheckRole::class,
             'permission' => \App\Http\Middleware\CheckPermission::class,
             'is-super-admin' => \App\Http\Middleware\IsSuperAdmin::class,
+            'ensure-super-admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
             'module' => \App\Http\Middleware\CheckModuleAccess::class,
         ]);
     })
