@@ -267,6 +267,16 @@
                                                         <i class="ti ti-truck-delivery me-1"></i> Tarifs de livraison
                                                     </a>
                                                     <div class="dropdown-divider"></div>
+                                                    <a class="dropdown-item" href="{{ route('platform-admin.entreprises.balances', $entreprise->id) }}">
+                                                        <i class="ti ti-wallet me-1"></i> Balances des marchands
+                                                    </a>
+                                                    <a class="dropdown-item" href="{{ route('platform-admin.entreprises.historique-balance', $entreprise->id) }}">
+                                                        <i class="ti ti-history me-1"></i> Historique de balance
+                                                    </a>
+                                                    <a class="dropdown-item" href="{{ route('platform-admin.entreprises.historique-reversement', $entreprise->id) }}">
+                                                        <i class="ti ti-arrow-back-up me-1"></i> Historique de reversement
+                                                    </a>
+                                                    <div class="dropdown-divider"></div>
                                                     <form action="{{ route('platform-admin.entreprises.toggle-status', $entreprise->id) }}" method="POST" class="d-inline">
                                                         @csrf
                                                         @if(($entreprise->statut ?? 0) == 1)

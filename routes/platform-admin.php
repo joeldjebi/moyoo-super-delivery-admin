@@ -58,13 +58,24 @@ Route::prefix('platform-admin')->name('platform-admin.')->group(function () {
         Route::get('entreprises-{id}-config', [App\Http\Controllers\PlatformAdmin\EntrepriseController::class, 'config'])->name('entreprises.config');
         Route::get('entreprises-{id}-tarifs-livraison', [App\Http\Controllers\PlatformAdmin\EntrepriseController::class, 'tarifsLivraison'])->name('entreprises.tarifs-livraison');
 
+        // Gestion des balances et reversements
+        Route::get('entreprises-{id}-balances', [App\Http\Controllers\PlatformAdmin\BalanceController::class, 'balances'])->name('entreprises.balances');
+        Route::get('entreprises-{id}-historique-balance', [App\Http\Controllers\PlatformAdmin\BalanceController::class, 'historiqueBalance'])->name('entreprises.historique-balance');
+        Route::get('entreprises-{id}-historique-reversement', [App\Http\Controllers\PlatformAdmin\BalanceController::class, 'historiqueReversement'])->name('entreprises.historique-reversement');
+
         // Gestion des utilisateurs
         Route::get('users', [App\Http\Controllers\PlatformAdmin\UserController::class, 'index'])->name('users.index');
         Route::get('users/{id}', [App\Http\Controllers\PlatformAdmin\UserController::class, 'show'])->name('users.show');
         Route::delete('users/{id}', [App\Http\Controllers\PlatformAdmin\UserController::class, 'destroy'])->name('users.destroy');
 
         // Gestion des plans tarifaires
-        Route::resource('pricing-plans', App\Http\Controllers\PlatformAdmin\PricingPlanController::class);
+        Route::get('pricing-plans', [App\Http\Controllers\PlatformAdmin\PricingPlanController::class, 'index'])->name('pricing-plans.index');
+        Route::get('pricing-plans/create', [App\Http\Controllers\PlatformAdmin\PricingPlanController::class, 'create'])->name('pricing-plans.create');
+        Route::post('pricing-plans', [App\Http\Controllers\PlatformAdmin\PricingPlanController::class, 'store'])->name('pricing-plans.store');
+        Route::get('pricing-plans/{id}', [App\Http\Controllers\PlatformAdmin\PricingPlanController::class, 'show'])->name('pricing-plans.show');
+        Route::get('pricing-plans-{id}-edit', [App\Http\Controllers\PlatformAdmin\PricingPlanController::class, 'edit'])->name('pricing-plans.edit');
+        Route::put('pricing-plans/{id}', [App\Http\Controllers\PlatformAdmin\PricingPlanController::class, 'update'])->name('pricing-plans.update');
+        Route::delete('pricing-plans/{id}', [App\Http\Controllers\PlatformAdmin\PricingPlanController::class, 'destroy'])->name('pricing-plans.destroy');
 
         // Gestion des modules pour les pricing plans
         Route::post('pricing-plans/{plan}/modules/{module}/attach', [App\Http\Controllers\PlatformAdmin\PricingPlanController::class, 'attachModule'])->name('pricing-plans.modules.attach');
@@ -86,6 +97,9 @@ Route::prefix('platform-admin')->name('platform-admin.')->group(function () {
         Route::get('global-data/ramassages', [App\Http\Controllers\PlatformAdmin\GlobalDataController::class, 'ramassages'])->name('global-data.ramassages');
         Route::get('global-data/livreurs', [App\Http\Controllers\PlatformAdmin\GlobalDataController::class, 'livreurs'])->name('global-data.livreurs');
         Route::get('global-data/boutiques', [App\Http\Controllers\PlatformAdmin\GlobalDataController::class, 'boutiques'])->name('global-data.boutiques');
+        Route::get('global-data/balances', [App\Http\Controllers\PlatformAdmin\BalanceController::class, 'globalBalances'])->name('global-data.balances');
+        Route::get('global-data/historique-balance', [App\Http\Controllers\PlatformAdmin\BalanceController::class, 'globalHistoriqueBalance'])->name('global-data.historique-balance');
+        Route::get('global-data/historique-reversement', [App\Http\Controllers\PlatformAdmin\BalanceController::class, 'globalHistoriqueReversement'])->name('global-data.historique-reversement');
 
         // Logs système
         Route::get('/logs', [App\Http\Controllers\PlatformAdmin\LogController::class, 'index'])->name('logs.index');

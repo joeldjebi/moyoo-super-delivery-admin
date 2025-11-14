@@ -183,7 +183,10 @@
                                          ($user && $user->hasPermission('global_data.colis')) ||
                                          ($user && $user->hasPermission('global_data.ramassages')) ||
                                          ($user && $user->hasPermission('global_data.livreurs')) ||
-                                         ($user && $user->hasPermission('global_data.boutiques'));
+                                         ($user && $user->hasPermission('global_data.boutiques')) ||
+                                         ($user && $user->hasPermission('global_data.balances')) ||
+                                         ($user && $user->hasPermission('global_data.historique_balance')) ||
+                                         ($user && $user->hasPermission('global_data.historique_reversement'));
                 @endphp
 
                 @if($hasGlobalDataItems)
@@ -238,6 +241,36 @@
                       <a href="{{ route('platform-admin.global-data.boutiques') }}" class="menu-link">
                         <i class="menu-icon tf-icons ti ti-building-store"></i>
                         <div data-i18n="Boutiques">Boutiques</div>
+                      </a>
+                    </li>
+                @endif
+
+                <!-- Balances globales -->
+                @if($user && $user->hasPermission('global_data.balances'))
+                    <li class="menu-item {{ isset($menu) && $menu == 'global-data-balances' ? 'active' : '' }}">
+                      <a href="{{ route('platform-admin.global-data.balances') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ti ti-wallet"></i>
+                        <div data-i18n="Balances des marchands">Balances des marchands</div>
+                      </a>
+                    </li>
+                @endif
+
+                <!-- Historique de balance global -->
+                @if($user && $user->hasPermission('global_data.historique_balance'))
+                    <li class="menu-item {{ isset($menu) && $menu == 'global-data-historique-balance' ? 'active' : '' }}">
+                      <a href="{{ route('platform-admin.global-data.historique-balance') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ti ti-history"></i>
+                        <div data-i18n="Historique de balance">Historique de balance</div>
+                      </a>
+                    </li>
+                @endif
+
+                <!-- Historique de reversement global -->
+                @if($user && $user->hasPermission('global_data.historique_reversement'))
+                    <li class="menu-item {{ isset($menu) && $menu == 'global-data-historique-reversement' ? 'active' : '' }}">
+                      <a href="{{ route('platform-admin.global-data.historique-reversement') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ti ti-arrow-back-up"></i>
+                        <div data-i18n="Historique de reversement">Historique de reversement</div>
                       </a>
                     </li>
                 @endif
