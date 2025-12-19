@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('platform-admin')->name('platform-admin.')->group(function () {
     // Routes d'authentification (publiques)
+    Route::get('/', [App\Http\Controllers\PlatformAdmin\AuthController::class, 'showLogin'])->name('login');
     Route::get('/login', [App\Http\Controllers\PlatformAdmin\AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [App\Http\Controllers\PlatformAdmin\AuthController::class, 'login'])->name('login.post');
 

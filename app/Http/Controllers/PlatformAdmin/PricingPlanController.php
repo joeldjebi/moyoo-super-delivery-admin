@@ -145,13 +145,16 @@ class PricingPlanController extends Controller
         if (!$admin || !$admin->hasPermission('pricing_plans.update')) {
             abort(403, 'Vous n\'avez pas la permission de modifier les plans tarifaires.');
         }
-        $plan = DB::table('pricing_plans')->where('id', $id)->first();
 
-        if (!$plan) {
-            abort(404);
-        }
+        $plan = PricingPlan::findOrFail($id);
 
-        return view('platform-admin.pricing-plans.edit', compact('plan'));
+        $data = [
+            'title' => 'Modifier le plan tarifaire',
+            'menu' => 'pricing-plans',
+            'plan' => $plan,
+        ];
+
+        return view('platform-admin.pricing-plans.edit', $data);
     }
 
     public function update(Request $request, string $id)
@@ -160,6 +163,9 @@ class PricingPlanController extends Controller
         if (!$admin || !$admin->hasPermission('pricing_plans.update')) {
             abort(403, 'Vous n\'avez pas la permission de modifier les plans tarifaires.');
         }
+
+        $plan = PricingPlan::findOrFail($id);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -172,6 +178,7 @@ class PricingPlanController extends Controller
             'sort_order' => 'nullable|integer|min:0',
         ]);
 
+        // Préparer les données pour la mise à jour
         $data = [
             'name' => $validated['name'],
             'description' => $validated['description'] ?? null,
@@ -179,13 +186,12 @@ class PricingPlanController extends Controller
             'currency' => $validated['currency'],
             'period' => $validated['period'],
             'features' => $validated['features'] ?? null,
-            'is_popular' => $validated['is_popular'] ?? false,
-            'is_active' => $validated['is_active'] ?? true,
+            'is_popular' => $request->has('is_popular') ? (bool)$request->input('is_popular') : false,
+            'is_active' => $request->has('is_active') ? (bool)$request->input('is_active') : true,
             'sort_order' => $validated['sort_order'] ?? 0,
-            'updated_at' => now(),
         ];
 
-        DB::table('pricing_plans')->where('id', $id)->update($data);
+        $plan->update($data);
 
         Log::info('Plan tarifaire modifié par super admin', [
             'admin_id' => auth()->guard('platform_admin')->id(),

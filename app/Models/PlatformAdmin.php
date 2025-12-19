@@ -334,10 +334,15 @@ class PlatformAdmin extends Authenticatable
         }
 
         // Vérifier les permissions via les rôles
-        return $this->roles()->whereHas('permissions', function ($query) use ($resource, $action) {
-            $query->where('resource', $resource)
-                  ->where('action', $action);
-        })->exists();
+        // Utiliser getPermissionsWithFallback() pour gérer les cas où role_id n'existe pas
+        foreach ($this->roles as $role) {
+            $permissions = $role->getPermissionsWithFallback();
+            if ($permissions->where('resource', $resource)->where('action', $action)->isNotEmpty()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }

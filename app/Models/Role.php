@@ -37,8 +37,20 @@ class Role extends Model
      */
     public function permissions(): BelongsToMany
     {
-        return $this->belongsToMany(Permission::class, 'role_permissions', 'role_id', 'permission_id')
-            ->withTimestamps();
+        // Détecter automatiquement quelle colonne utiliser
+        $hasRoleId = Schema::hasColumn('role_permissions', 'role_id');
+        
+        if ($hasRoleId) {
+            return $this->belongsToMany(Permission::class, 'role_permissions', 'role_id', 'permission_id')
+                ->withTimestamps();
+        } else {
+            // Utiliser la colonne 'role' (varchar) avec une condition where personnalisée
+            // On ne peut pas utiliser belongsToMany avec une colonne varchar comme clé étrangère
+            // On retourne une relation vide et on utilise getPermissionsWithFallback() à la place
+            return $this->belongsToMany(Permission::class, 'role_permissions', 'role', 'permission_id')
+                ->wherePivot('role', $this->slug)
+                ->withTimestamps();
+        }
     }
 
     /**

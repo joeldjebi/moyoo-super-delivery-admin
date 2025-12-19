@@ -18,7 +18,8 @@ return new class extends Migration
                 $table->foreignId('permission_id')->constrained('permissions')->cascadeOnDelete();
                 $table->timestamps();
 
-                $table->unique(['platform_admin_id', 'permission_id']);
+                // Nom explicite (plus court) pour éviter l'erreur MySQL "identifier name is too long"
+                $table->unique(['platform_admin_id', 'permission_id'], 'pa_perm_unique');
                 $table->index('platform_admin_id');
                 $table->index('permission_id');
             });

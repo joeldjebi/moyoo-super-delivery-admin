@@ -15,11 +15,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Ne pas créer d'utilisateur de test car la table users existe déjà avec une structure différente
         // User::factory(10)->create();
+        // User::factory()->create([
+        //     'name' => 'Test User',
+        //     'email' => 'test@example.com',
+        // ]);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // Seeders pour la plateforme admin
+        $this->call([
+            PlatformAdminSeeder::class,
+            RBACSeeder::class,
+            AssignAllPermissionsToSuperAdminSeeder::class,
+            ModuleSeeder::class,
         ]);
     }
 }

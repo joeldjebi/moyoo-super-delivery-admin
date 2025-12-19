@@ -11,11 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('modules', function (Blueprint $table) {
-            $table->decimal('price', 10, 2)->nullable()->after('description');
-            $table->string('currency', 3)->default('XOF')->after('price');
-            $table->boolean('is_optional')->default(false)->after('currency');
-        });
+        if (!Schema::hasColumn('modules', 'price')) {
+            Schema::table('modules', function (Blueprint $table) {
+                $table->decimal('price', 10, 2)->nullable()->after('description');
+            });
+        }
+        
+        if (!Schema::hasColumn('modules', 'currency')) {
+            Schema::table('modules', function (Blueprint $table) {
+                $table->string('currency', 3)->default('XOF')->after('price');
+            });
+        }
+        
+        if (!Schema::hasColumn('modules', 'is_optional')) {
+            Schema::table('modules', function (Blueprint $table) {
+                $table->boolean('is_optional')->default(false)->after('currency');
+            });
+        }
     }
 
     /**

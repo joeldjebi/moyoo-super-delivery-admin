@@ -12,14 +12,26 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Pour PostgreSQL, modifier directement la colonne pour qu'elle soit nullable
+        $driver = DB::connection()->getDriverName();
+
+        // Rendre les colonnes nullable, en utilisant la syntaxe correcte selon le SGBD.
+        // - PostgreSQL: ALTER COLUMN ... DROP NOT NULL
+        // - MySQL/MariaDB: MODIFY ... NULL
         if (Schema::hasColumn('modules', 'price')) {
-            DB::statement('ALTER TABLE modules ALTER COLUMN price DROP NOT NULL');
+            if ($driver === 'pgsql') {
+                DB::statement('ALTER TABLE modules ALTER COLUMN price DROP NOT NULL');
+            } elseif ($driver === 'mysql') {
+                DB::statement('ALTER TABLE modules MODIFY price DECIMAL(10,2) NULL');
+            }
         }
-        
-        // S'assurer que currency peut aussi être null
+
         if (Schema::hasColumn('modules', 'currency')) {
-            DB::statement('ALTER TABLE modules ALTER COLUMN currency DROP NOT NULL');
+            if ($driver === 'pgsql') {
+                DB::statement('ALTER TABLE modules ALTER COLUMN currency DROP NOT NULL');
+            } elseif ($driver === 'mysql') {
+                // Conserver le DEFAULT existant tout en autorisant NULL
+                DB::statement("ALTER TABLE modules MODIFY currency VARCHAR(3) NULL DEFAULT 'XOF'");
+            }
         }
     }
 
@@ -28,13 +40,18 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Remettre les contraintes NOT NULL si nécessaire
-        if (Schema::hasColumn('modules', 'price')) {
-            DB::statement('ALTER TABLE modules ALTER COLUMN price SET NOT NULL');
-        }
-        
+        $driver = DB::connection()->getDriverName();
+
+        // Revenir à l'état avant cette migration:
+        // - `price` était déjà nullable dans 2025_11_07_120000_add_price_fields_to_modules_table.php
+        // - `currency` était NOT NULL avec DEFAULT 'XOF'
         if (Schema::hasColumn('modules', 'currency')) {
-            DB::statement('ALTER TABLE modules ALTER COLUMN currency SET NOT NULL');
+            if ($driver === 'pgsql') {
+                DB::statement("ALTER TABLE modules ALTER COLUMN currency SET NOT NULL");
+                DB::statement("ALTER TABLE modules ALTER COLUMN currency SET DEFAULT 'XOF'");
+            } elseif ($driver === 'mysql') {
+                DB::statement("ALTER TABLE modules MODIFY currency VARCHAR(3) NOT NULL DEFAULT 'XOF'");
+            }
         }
     }
 };
